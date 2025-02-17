@@ -34,6 +34,8 @@ option_list = list(
               help="Full path to the directory for the downloaded file after decompression [required]"),
   make_option("--PATH_out", action="store", default=NA, type='character',
               help="Output directory of results [required]"),
+  make_option("--PATH_plink", action="store", default=NA, type='character',
+              help="Path to plink2 executable [required]"),
   make_option("--FILE_sst", action="store", default=NA, type='character',
               help="Full path and the file name of the GWAS summary statistics, separated by comma [required] [must have columns: rsid, chr, beta, beta_se, a1, a0, n_eff]"),
   make_option("--pop", action="store", default=NA, type='character',

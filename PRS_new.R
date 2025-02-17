@@ -227,114 +227,116 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
   
-  nblock <- length(LD_list0[[l]])
+  #nblock <- length(LD_list0[[l]])
+  nblock = 1
   if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.2. Transform to standard data format
-  
-  # # Organize data in a structure fit in the algorithm
-  # indx_block1 <- integer(length = nblock)
-  # snp_list1 <- vector("list", length = nblock)
-  # Nsnps1 <- integer(length = nblock)
-  # indx1 <- vector("list", length = nblock)
-  # summ_list1 <- vector("list", length = nblock)
-  # snps_scale1 <- vector("list", length = nblock)
-  # LD_list1 <- vector("list", length = nblock)
+  if (opt$verbose == 2) cat("\n** Step 2.2 started for chromosome ", chr, " **\n")
+  # Organize data in a structure fit in the algorithm
+  indx_block1 <- integer(length = nblock)
+  snp_list1 <- vector("list", length = nblock)
+  Nsnps1 <- integer(length = nblock)
+  indx1 <- vector("list", length = nblock)
+  summ_list1 <- vector("list", length = nblock)
+  snps_scale1 <- vector("list", length = nblock)
+  LD_list1 <- vector("list", length = nblock)
+
+  for (bl in 1:nblock){
+
+    ## snp_list1, Nsnps1
+    snp_list_tmp <- vector("list", length = M)
+    tmp <- character()
+    for (l in 1:M){
+      if(is.null(snps_list0[[l]][[bl]])) { next }
+      snp_list_tmp[[l]] <- snps_list0[[l]][[bl]]
+      tmp <- c(tmp, snp_list_tmp[[l]])
+    }
+    tmp <- unique(tmp)
+    Nsnps1[bl] <- length(tmp)
+    if(Nsnps1[bl]==0){ indx_block1[bl] <- 0; next }
+    snp_list1[[bl]] <- tmp
+    indx_block1[bl] <- 1
+
+    ## indx1: the position of ref SNP in original summ_list
+    ## summ_list1: summ stat matched to reference snp list (set to 0 for snps not in a certain ethnic group)
+    ## LD_list1: LD correlations matched to reference snp list (set to 0 for snps not in a certain ethnic group)
+    indx_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
+    summ_list_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
+    snps_scale_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
+    LD_list_tmp <- vector("list", length = M)
+    for (l in 1:M){
+      m <- match(snp_list1[[bl]], snp_list_tmp[[l]]); m1 <- m; m1[is.na(m1)] <- 0; indx_tmp[,l] <- m1
+      m1 <- summ_list0[[l]][[bl]][m]; summ_list_tmp[,l] <- m1
+      m1 <- snps_scale0[[l]][[bl]][m]; snps_scale_tmp[,l] <- m1
+      m1 <- as.matrix(LD_list0[[l]][[bl]][m,m]); m1[is.na(m1)] <- 0; diag(m1)[is.na(m)] <- 1; LD_list_tmp[[l]] <- m1
+    }
+    indx1[[bl]] <- indx_tmp
+    summ_list1[[bl]] <- summ_list_tmp
+    snps_scale1[[bl]] <- snps_scale_tmp
+    LD_list1[[bl]] <- LD_list_tmp
+
+    rm(list=c("indx_tmp","summ_list_tmp","snps_scale_tmp","LD_list_tmp","snp_list_tmp","tmp","m1"))
+  }
+
+  summ_list <- summ_list1
+  snps_scale <- snps_scale1
+  LD_list <- LD_list1
+  indx <- indx1
+  indx_block <- indx_block1
+  snp_list <- snp_list1
+  Nsnps <- Nsnps1
+  N <- N0
+
+  rm(list=c("summ_list1","snps_scale1","LD_list1","indx1","indx_block1","snp_list1","Nsnps1",
+            "Nsnps0","snps_list0","snps_scale0","summ_list0","l","LD_list0","tmp"))
+  if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
+  ############
+  #2.3
+  # Organize data in a structure fit for the algorithm
+  # if (opt$verbose == 2) cat("\n** Step 2.2 started for chromosome ", chr, " **\n")
+  # snp_list <- character()
+  # Nsnps <- 0
+  # indx <- matrix(nrow = 0, ncol = M)
+  # summ_list <- matrix(nrow = 0, ncol = M)
+  # snps_scale <- matrix(nrow = 0, ncol = M)
+  # LD_list <- vector("list", length = M)
   # 
-  # for (bl in 1:nblock){
-  # 
-  #   ## snp_list1, Nsnps1
-  #   snp_list_tmp <- vector("list", length = M)
-  #   tmp <- character()
-  #   for (l in 1:M){
-  #     if(is.null(snps_list0[[l]][[bl]])) { next }
-  #     snp_list_tmp[[l]] <- snps_list0[[l]][[bl]]
-  #     tmp <- c(tmp, snp_list_tmp[[l]])
+  # # Collect all SNPs across M datasets
+  # tmp <- character()
+  # for (l in 1:M){
+  #   if (!is.null(snps_list0[[l]])) {
+  #     tmp <- c(tmp, unlist(snps_list0[[l]]))
   #   }
-  #   tmp <- unique(tmp)
-  #   Nsnps1[bl] <- length(tmp)
-  #   if(Nsnps1[bl]==0){ indx_block1[bl] <- 0; next }
-  #   snp_list1[[bl]] <- tmp
-  #   indx_block1[bl] <- 1
+  # }
+  # snp_list <- unique(tmp)
+  # Nsnps <- length(snp_list)
   # 
-  #   ## indx1: the position of ref SNP in original summ_list
-  #   ## summ_list1: summ stat matched to reference snp list (set to 0 for snps not in a certain ethnic group)
-  #   ## LD_list1: LD correlations matched to reference snp list (set to 0 for snps not in a certain ethnic group)
-  #   indx_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
-  #   summ_list_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
-  #   snps_scale_tmp <- matrix(nrow = Nsnps1[bl], ncol = M)
-  #   LD_list_tmp <- vector("list", length = M)
+  # if (Nsnps > 0) {
+  #   indx <- matrix(nrow = Nsnps, ncol = M)
+  #   summ_list <- matrix(nrow = Nsnps, ncol = M)
+  #   snps_scale <- matrix(nrow = Nsnps, ncol = M)
+  #   LD_list <- vector("list", length = M)
+  #   
   #   for (l in 1:M){
-  #     m <- match(snp_list1[[bl]], snp_list_tmp[[l]]); m1 <- m; m1[is.na(m1)] <- 0; indx_tmp[,l] <- m1
-  #     m1 <- summ_list0[[l]][[bl]][m]; summ_list_tmp[,l] <- m1
-  #     m1 <- snps_scale0[[l]][[bl]][m]; snps_scale_tmp[,l] <- m1
-  #     m1 <- as.matrix(LD_list0[[l]][[bl]][m,m]); m1[is.na(m1)] <- 0; diag(m1)[is.na(m)] <- 1; LD_list_tmp[[l]] <- m1
+  #     m <- match(snp_list, unlist(snps_list0[[l]]))
+  #     m1 <- m; m1[is.na(m1)] <- 0; indx[,l] <- m1
+  #     summ_list[,l] <- if (!is.null(summ_list0[[l]])) summ_list0[[l]][m] else 0
+  #     snps_scale[,l] <- if (!is.null(snps_scale0[[l]])) snps_scale0[[l]][m] else 0
+  #     
+  #     if (!is.null(LD_list0[[l]])) {
+  #       m1 <- as.matrix(LD_list0[[l]][m,m])
+  #       m1[is.na(m1)] <- 0
+  #       diag(m1)[is.na(m)] <- 1
+  #       LD_list[[l]] <- m1
+  #     }
   #   }
-  #   indx1[[bl]] <- indx_tmp
-  #   summ_list1[[bl]] <- summ_list_tmp
-  #   snps_scale1[[bl]] <- snps_scale_tmp
-  #   LD_list1[[bl]] <- LD_list_tmp
-  # 
-  #   rm(list=c("indx_tmp","summ_list_tmp","snps_scale_tmp","LD_list_tmp","snp_list_tmp","tmp","m1"))
   # }
   # 
-  # summ_list <- summ_list1
-  # snps_scale <- snps_scale1
-  # LD_list <- LD_list1
-  # indx <- indx1
-  # indx_block <- indx_block1
-  # snp_list <- snp_list1
-  # Nsnps <- Nsnps1
   # N <- N0
   # 
-  # rm(list=c("summ_list1","snps_scale1","LD_list1","indx1","indx_block1","snp_list1","Nsnps1",
-  #           "Nsnps0","snps_list0","snps_scale0","summ_list0","l","LD_list0","tmp"))
-  
-  
-  # Organize data in a structure fit for the algorithm
-  if (opt$verbose == 2) cat("\n** Step 2.2 started for chromosome ", chr, " **\n")
-  snp_list <- character()
-  Nsnps <- 0
-  indx <- matrix(nrow = 0, ncol = M)
-  summ_list <- matrix(nrow = 0, ncol = M)
-  snps_scale <- matrix(nrow = 0, ncol = M)
-  LD_list <- vector("list", length = M)
-  
-  # Collect all SNPs across M datasets
-  tmp <- character()
-  for (l in 1:M){
-    if (!is.null(snps_list0[[l]])) {
-      tmp <- c(tmp, unlist(snps_list0[[l]]))
-    }
-  }
-  snp_list <- unique(tmp)
-  Nsnps <- length(snp_list)
-  
-  if (Nsnps > 0) {
-    indx <- matrix(nrow = Nsnps, ncol = M)
-    summ_list <- matrix(nrow = Nsnps, ncol = M)
-    snps_scale <- matrix(nrow = Nsnps, ncol = M)
-    LD_list <- vector("list", length = M)
-    
-    for (l in 1:M){
-      m <- match(snp_list, unlist(snps_list0[[l]]))
-      m1 <- m; m1[is.na(m1)] <- 0; indx[,l] <- m1
-      summ_list[,l] <- if (!is.null(summ_list0[[l]])) summ_list0[[l]][m] else 0
-      snps_scale[,l] <- if (!is.null(snps_scale0[[l]])) snps_scale0[[l]][m] else 0
-      
-      if (!is.null(LD_list0[[l]])) {
-        m1 <- as.matrix(LD_list0[[l]][m,m])
-        m1[is.na(m1)] <- 0
-        diag(m1)[is.na(m)] <- 1
-        LD_list[[l]] <- m1
-      }
-    }
-  }
-  
-  N <- N0
-  
-  rm(list = c("snps_list0", "snps_scale0", "summ_list0", "LD_list0", "tmp", "m1"))
-  if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
+  # rm(list = c("snps_list0", "snps_scale0", "summ_list0", "LD_list0", "tmp", "m1"))
+  # if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.3. Run algorithm
   
@@ -343,6 +345,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # indx_block=indx_block,
   # delta=delta, lambdapath=lambdapath, cpath=cpath,
   # verbose=opt$verbose)
+  
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   res <- gradient_descent_transfer_learning_rcpp_PRS(n0 = num_samples[1], r0 = summ_list[,1], R0 = LD_list[1], nk_list = num_samples[1], rk_list = summ_list[,-1], Rk_list = LD_list[-1], 
                                                      alpha1 = 0.01, alpha2 = 0.01, alpha3 = 0.01, alpha4 = 0.01, eta_l = 0.01, eta_m = 0.01, max_iter = 100)

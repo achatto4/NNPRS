@@ -343,8 +343,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # delta=delta, lambdapath=lambdapath, cpath=cpath,
   # verbose=opt$verbose)
   
-  res <- gradient_descent_transfer_learning_rcpp_PRS(n0 = num_samples[1], r0 = summ_list[,1], R0 = LD_list[1], nk_list = num_samples[1], rk_list = summ_list[,1], Rk_list = LD_list[-1], alpha1,
-                                                     alpha2, alpha3, alpha4, eta_l, eta_m, max_iter)
+  res <- gradient_descent_transfer_learning_rcpp_PRS(n0 = num_samples[1], r0 = summ_list[,1], R0 = LD_list[1], nk_list = num_samples[1], rk_list = summ_list[,1], Rk_list = LD_list[-1], 
+                                                     alpha1 = 0.01, alpha2 = 0.01, alpha3 = 0.01, alpha4 = 0.01, eta_l = 0.01, eta_m = 0.01, max_iter = 100)
     #summ=summ_list, R=LD_list,M=M, indx=indx
   
   rm(list=c("summ_list","LD_list","Nsnps","indx","indx_block"))

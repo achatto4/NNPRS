@@ -87,7 +87,7 @@ suppressWarnings(dir.create(paste0(opt$PATH_out, "/tmp")))
 suppressWarnings(dir.create(paste0(opt$PATH_out, "/tmp/PRS_in_all_settings_bychrom")))
 suppressWarnings(dir.create(paste0(opt$PATH_out, "/before_ensemble")))
 
-sourceCpp("grad_func_PRS.cpp")
+sourceCpp("/dcs04/nilanjan/data/Anagh/PRS_proj/code_github/Promit_projects/grad_func_PRS.cpp")
 
 
 ########################################################################

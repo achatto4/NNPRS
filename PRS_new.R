@@ -51,7 +51,9 @@ option_list = list(
   make_option("--bfile_testing", action="store", default=NA, type='character',
               help="Path to PLINK binary input file prefix (minus bed/bim/fam) for testing [required]"),
   make_option("--pheno_testing", action="store", default=NA, type='character',
-              help="Path to phenotype file for testing (PLINK format) [optional, taken from bfile otherwise]")
+              help="Path to phenotype file for testing (PLINK format) [optional, taken from bfile otherwise]"),
+  make_option("--testing", action="store", default=F, type='logical',
+              help="Whether to perform testing in seperate dataset [required]")
   
 )
 opt = parse_args(OptionParser(option_list=option_list))

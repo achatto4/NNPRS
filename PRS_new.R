@@ -47,7 +47,11 @@ option_list = list(
   make_option("--verbose", action="store", default=1, type="integer",
               help="How much chatter to print: 0=nothing; 1=minimal; 2=all [default: %default]"),
   make_option("--NCORES", action="store", default=1, type="integer",
-              help="How many cores to use [default: %default]")
+              help="How many cores to use [default: %default]"),
+  make_option("--bfile_testing", action="store", default=NA, type='character',
+              help="Path to PLINK binary input file prefix (minus bed/bim/fam) for testing [required]"),
+  make_option("--pheno_testing", action="store", default=NA, type='character',
+              help="Path to phenotype file for testing (PLINK format) [optional, taken from bfile otherwise]")
   
 )
 opt = parse_args(OptionParser(option_list=option_list))

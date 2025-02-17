@@ -349,44 +349,38 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
   # Prepare the input for gradient descent by aligning SNP data using indx
-  r0 <- summ_list[[1]][,1]  # First column of summary statistics
-  R0 <- LD_list[[1]][[1]]   # First LD matrix (assuming it's a matrix for this block)
-  nk_list <- Nsnps          # List of sample sizes (based on Nsnps1 or equivalent)
-  rk_list <- summ_list[-1]  # All columns except the first for the summary stats
-  Rk_list <- LD_list[-1]    # All LD matrices except the first
+  r0_block <- list()
+  R0_block <- list()
+  rk_list_block <- vector("list", length = nblock)
+  Rk_list_block <- vector("list", length = nblock)
   
-  # Initialize r0_block to NULL to handle the block-wise assignment
-  r0_block <- NULL
-  R0_block <- NULL
-  
-  # Ensure that we handle missing values appropriately
-  # Indices in indx will help us align the SNPs properly in the subsequent matrices.
   for (bl in 1:nblock) {
     if (indx_block[bl] == 1) {
       snp_indices <- indx[[bl]]
       
       # Subset data based on the indices for matching SNPs
-      r0_block <- r0[snp_indices]  # Subset r0 using snp_indices
-      R0_block <- R0[snp_indices, snp_indices, drop = FALSE]  # Subset R0 matrix
+      r0_block[[bl]] <- summ_list[[1]][snp_indices, 1]
+      R0_block[[bl]] <- LD_list[[1]][[bl]][snp_indices, snp_indices, drop = FALSE]
       
-      # Create the corresponding blocks for rk_list and Rk_list
-      rk_block <- lapply(rk_list, function(x) x[snp_indices])
-      Rk_block <- lapply(Rk_list, function(x) x[snp_indices, snp_indices, drop = FALSE])
-      
-      # Update the lists for the gradient descent function
-      rk_list[[bl]] <- rk_block
-      Rk_list[[bl]] <- Rk_block
+      rk_list_block[[bl]] <- lapply(seq_along(rk_list), function(l) rk_list[[l]][snp_indices])
+      Rk_list_block[[bl]] <- lapply(seq_along(Rk_list), function(l) Rk_list[[l]][snp_indices, snp_indices, drop = FALSE])
     }
   }
+  
+  # Flatten blocks into a format suitable for the gradient descent function
+  r0_combined <- do.call(c, r0_block)
+  R0_combined <- do.call(rbind, lapply(R0_block, as.matrix))
+  rk_combined <- lapply(seq_along(rk_list), function(l) do.call(c, lapply(rk_list_block, `[[`, l)))
+  Rk_combined <- lapply(seq_along(Rk_list), function(l) do.call(rbind, lapply(Rk_list_block, `[[`, l)))
   
   # Now we are ready to pass the adjusted data to the gradient descent function
   res <- gradient_descent_transfer_learning_rcpp_PRS(
     n0 = num_samples[1], 
-    r0 = r0_block,  # Adjusted r0 for the block
-    R0 = R0_block,  # Adjusted R0 for the block
-    nk_list = nk_list, 
-    rk_list = rk_list, 
-    Rk_list = Rk_list, 
+    r0 = r0_combined, 
+    R0 = R0_combined, 
+    nk_list = num_samples[-1], 
+    rk_list = rk_combined, 
+    Rk_list = Rk_combined, 
     alpha1 = 0.01, 
     alpha2 = 0.01, 
     alpha3 = 0.01, 
@@ -396,8 +390,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     max_iter = 100
   )
   
-  rm(list=c("summ_list","LD_list","Nsnps","indx","indx_block"))
+  rm(list = c("summ_list", "LD_list", "Nsnps", "indx", "indx_block"))
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
+  
   ############
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")

@@ -355,6 +355,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   rk_list <- summ_list[-1]  # All columns except the first for the summary stats
   Rk_list <- LD_list[-1]    # All LD matrices except the first
   
+  # Initialize r0_block to NULL to handle the block-wise assignment
+  r0_block <- NULL
+  R0_block <- NULL
+  
   # Ensure that we handle missing values appropriately
   # Indices in indx will help us align the SNPs properly in the subsequent matrices.
   for (bl in 1:nblock) {

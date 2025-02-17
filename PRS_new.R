@@ -349,17 +349,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
-  # Prepare the input for gradient descent by aligning SNP data using indx
-  r0 <- summ_list[[1]][,1]  # First column of summary statistics
-  R0 <- LD_list[[1]][[1]]   # First LD matrix (assuming it's a matrix for this block)
-  rk_list <- summ_list[[1]][-1]  # All columns except the first for the summary stats
-  Rk_list <- LD_list[[1]][-1]    # All LD matrices except the first
-  
-  # Initialize r0_block and R0_block to NULL for block-wise assignment
-  r0_block <- NULL
-  R0_block <- NULL
-  
-  # Ensure that we handle missing values appropriately
+  # Adjusting the SNP alignment across ethnicities using indx
   for (bl in 1:nblock) {
     if (indx_block[bl] == 1) {
       snp_indices <- indx[[bl]]
@@ -368,21 +358,21 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
       r0_block <- r0[snp_indices]  # Subset r0 using snp_indices
       R0_block <- R0[snp_indices, snp_indices, drop = FALSE]  # Subset R0 matrix
       
-      # Check if r0_block is a vector
+      # Check if r0_block is a vector (important for gradient descent)
       if (!is.vector(r0_block)) {
         stop(paste("Error: r0_block for block", bl, "is not a vector."))
       }
       
-      # Check if R0_block is a matrix
+      # Check if R0_block is a matrix (important for gradient descent)
       if (!is.matrix(R0_block)) {
         stop(paste("Error: R0_block for block", bl, "is not a matrix."))
       }
       
-      # Create corresponding blocks for rk_list and Rk_list
+      # Ensure all elements in rk_list are vectors, and Rk_list are matrices
       rk_block <- lapply(rk_list, function(x) x[snp_indices])
       Rk_block <- lapply(Rk_list, function(x) x[snp_indices, snp_indices, drop = FALSE])
       
-      # Ensure rk_block elements are vectors and Rk_block elements are matrices
+      # Validation check for rk_list and Rk_list
       for (k in 1:length(rk_block)) {
         if (!is.vector(rk_block[[k]])) stop("Error: rk_list element is not a vector!")
         if (!is.matrix(Rk_block[[k]])) stop("Error: Rk_list element is not a matrix!")
@@ -394,7 +384,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     }
   }
   
-  # Once the SNP blocks are prepared, we pass the adjusted data to the gradient descent function
+  # After preparation, pass the adjusted data to the gradient descent function
   tryCatch({
     res <- gradient_descent_transfer_learning_rcpp_PRS(
       n0 = num_samples[1], 
@@ -416,7 +406,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     cat("Error message:", e$message, "\n")
   })
   
-  rm(list=c("summ_list","LD_list","Nsnps","indx","indx_block"))
+  rm(list = c("summ_list", "LD_list", "Nsnps", "indx", "indx_block"))
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.4. Clean PRSs into a vector

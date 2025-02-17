@@ -349,6 +349,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
+  # Initialize r0 and R0 for each chromosome before the loop
+  r0 <- numeric(Nsnps[bl])  # Adjust size as necessary
+  R0 <- matrix(0, nrow = Nsnps[bl], ncol = Nsnps[bl])  # Adjust dimensions accordingly
+  
   # Adjusting the SNP alignment across ethnicities using indx
   for (bl in 1:nblock) {
     if (indx_block[bl] == 1) {
@@ -406,8 +410,11 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     cat("Error message:", e$message, "\n")
   })
   
-  rm(list = c("summ_list", "LD_list", "Nsnps", "indx", "indx_block"))
+  # Cleanup
+  rm(list = c("r0_block", "R0_block", "rk_block", "Rk_block"))
+  
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
+  
   ############
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")

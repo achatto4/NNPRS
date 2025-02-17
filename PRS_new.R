@@ -184,7 +184,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   ############
   ## Step 2.1. Extract variants in both provided summary statistics and reference data
-  
+  if (opt$verbose == 2) cat("\n** Step 2.1 started for chromosome ", chr, " **\n")
   Nsnps0 <- vector("list", length = M)
   snps_list0 <- vector("list", length = M)
   LD_list0 <- vector("list", length = M)
@@ -228,7 +228,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   }
   
   nblock <- length(LD_list0[[l]])
-  
+  if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.2. Transform to standard data format
   
@@ -292,6 +292,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   
   # Organize data in a structure fit for the algorithm
+  if (opt$verbose == 2) cat("\n** Step 2.2 started for chromosome ", chr, " **\n")
   snp_list <- character()
   Nsnps <- 0
   indx <- matrix(nrow = 0, ncol = M)
@@ -333,7 +334,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   N <- N0
   
   rm(list = c("snps_list0", "snps_scale0", "summ_list0", "LD_list0", "tmp", "m1"))
-  
+  if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.3. Run algorithm
   
@@ -342,21 +343,21 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # indx_block=indx_block,
   # delta=delta, lambdapath=lambdapath, cpath=cpath,
   # verbose=opt$verbose)
-  
-  res <- gradient_descent_transfer_learning_rcpp_PRS(n0 = num_samples[1], r0 = summ_list[,1], R0 = LD_list[1], nk_list = num_samples[1], rk_list = summ_list[,1], Rk_list = LD_list[-1], 
+  if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
+  res <- gradient_descent_transfer_learning_rcpp_PRS(n0 = num_samples[1], r0 = summ_list[,1], R0 = LD_list[1], nk_list = num_samples[1], rk_list = summ_list[,-1], Rk_list = LD_list[-1], 
                                                      alpha1 = 0.01, alpha2 = 0.01, alpha3 = 0.01, alpha4 = 0.01, eta_l = 0.01, eta_m = 0.01, max_iter = 100)
     #summ=summ_list, R=LD_list,M=M, indx=indx
   
   rm(list=c("summ_list","LD_list","Nsnps","indx","indx_block"))
-  
+  if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.4. Clean PRSs into a vector
-  
+  if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
   prs <- res$b * snps_scale  # Element-wise multiplication
   prs[is.na(prs)] <- 0       # Replace NA values with 0
   prs[prs > 10] <- 0         # Thresholding extreme values
   prs[prs < -10] <- 0
-  
+  if (opt$verbose == 2) cat("\n** Step 2.4 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.5. Summarize tuning parameter setting for each grid search
   # 
@@ -373,7 +374,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   #
   # Note: 1. In the final prs file, the columns are: (rsid, a1: effect allele, a0: reference allele, PRSs...)
   #       2. For the param file, the order of its rows is same as the order of columns for PRSs. The param file indicate the tuning parameters and score source of the PRSs.
-  
+  if (opt$verbose == 2) cat("\n** Step 2.6 started for chromosome ", chr, " **\n")
   snps <- unlist(snp_list)
   ref_tmp <- ref[match(snps, ref$V2),]
   df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
@@ -387,10 +388,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
 }
 
 rm(list=c("df_beta_list"))
-
+if (opt$verbose == 2) cat("\n** Step 2.6 ended for chromosome ", chr, " **\n")
 ############
 ## Step 2.7. Combine all chromosomes
-
+if (opt$verbose == 2) cat("\n** Step 2.7 started for chromosome ", chr, " **\n")
 score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
   chr <- allchrom[j]
   prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
@@ -407,7 +408,7 @@ fwrite2(param, paste0(opt$PATH_out,"/before_ensemble/score_param.txt"), col.name
 
 if ( opt$verbose >= 1 ) cat(paste0("PRSs in all tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
 if ( opt$verbose >= 1 ) cat(paste0("Their corresponding tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_param.txt \n"))
-
+if (opt$verbose == 2) cat("\n** Step 2.8 started for chromosome ", chr, " **\n")
 ################
 if(opt$testing){
   

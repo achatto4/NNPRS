@@ -67,7 +67,8 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     // Print the gradients for testing at each iteration (first few elements)
     Rcpp::Rcout << "Iteration " << l << " - u_l (first few): " << u_l.head(10).t() << std::endl;
     Rcpp::Rcout << "Iteration " << l << " - v_l (first few): " << v_l.head(10).t() << std::endl;
-      
+    Rcpp::Rcout << "Iteration " << l << " - grad_u (first few): " << grad_u.head(10).t() << std::endl;
+    Rcpp::Rcout << "Iteration " << l << " - grad_v (first few): " << grad_v.head(10).t() << std::endl;
     
   }
   

@@ -63,6 +63,12 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     double total_n = std::accumulate(nk_list.begin(), nk_list.end(), 0.0) + n0;
     u_l -= (eta_l / total_n) * grad_u;
     v_l -= (eta_l / total_n) * grad_v;
+    
+    // Print the gradients for testing at each iteration (first few elements)
+    if (l == 0 || l == max_iter / 2 || l == max_iter) {
+      Rcpp::Rcout << "Iteration " << l << " - grad_u (first few): " << grad_u.head(5).t() << std::endl;
+      Rcpp::Rcout << "Iteration " << l << " - grad_v (first few): " << grad_v.head(5).t() << std::endl;
+    }
   }
   
   arma::vec hat_u = u_l;
@@ -84,6 +90,12 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     
     h_m -= (eta_m / n0) * grad_h;
     g_m -= (eta_m / n0) * grad_g;
+    
+    // Print the gradients for testing at each iteration (first few elements)
+    if (m == 0 || m == max_iter / 2 || m == max_iter) {
+      Rcpp::Rcout << "Iteration " << m << " - grad_h (first few): " << grad_h.head(5).t() << std::endl;
+      Rcpp::Rcout << "Iteration " << m << " - grad_g (first few): " << grad_g.head(5).t() << std::endl;
+    }
   }
   
   arma::vec hat_h = h_m;

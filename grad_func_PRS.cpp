@@ -146,6 +146,11 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        Rk_list.push_back(Rcpp::as<arma::mat>(R[i]));
      }
      
+     Rcpp::Rcout << "Checking inputs before calling gradient descent..." << std::endl;
+     Rcpp::Rcout << "n0: " << n0 << ", total_n: " << std::accumulate(nk_list.begin(), nk_list.end(), 0.0) + n0 << std::endl;
+     Rcpp::Rcout << "First few elements of r0: " << summ.col(0).head(10).t() << std::endl;
+     Rcpp::Rcout << "First few elements of R0: " << Rcpp::as<arma::mat>(R[0]).submat(0,0,4,4) << std::endl;
+     
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
        n0, 

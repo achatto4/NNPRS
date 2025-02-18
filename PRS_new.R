@@ -286,7 +286,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   snp_list <- snp_list1
   Nsnps <- Nsnps1
   N <- N0
-
+  #testing
+print(N0)
   rm(list=c("summ_list1","snps_scale1","LD_list1","indx1","indx_block1","snp_list1","Nsnps1",
             "Nsnps0","snps_list0","snps_scale0","summ_list0","l","LD_list0","tmp"))
   if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
@@ -402,6 +403,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
 
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
+  #testing
+  print(head(res$b[[bl]]))
   
   for (bl in 1:nblock) {
     tmp1 <- res$b[[bl]]  # Extract beta vector for block 'bl'

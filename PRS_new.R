@@ -393,8 +393,6 @@ print(N0)
   #   cat("Error message:", e$message, "\n")
   # })
   
-  # Cleanup
-  rm(list = c("r0_block", "R0_block", "rk_block", "Rk_block"))
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   
   ############
@@ -420,7 +418,7 @@ print(N0)
   prs <- b_tmp
   #testing
   print(table(prs))
-  print(dim(prs))
+  print(length(prs))
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0
   prs[prs > 10] <- 0    # Set values greater than 10 to 0
@@ -437,7 +435,7 @@ print(N0)
   #
   # Note: 1. In the final prs file, the columns are: (rsid, a1: effect allele, a0: reference allele, PRSs...)
   #       2. For the param file, the order of its rows is same as the order of columns for PRSs. The param file indicate the tuning parameters and score source of the PRSs.
-  if (opt$verbose == 2) cat("\n** Step 2.6 started for chromosome ", chr, " **\n")
+  
   snps <- unlist(snp_list)
   ref_tmp <- ref[match(snps, ref$V2),]
   df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
@@ -445,16 +443,16 @@ print(N0)
   fwrite2(df, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"), col.names = F, sep="\t", nThread=1)
   #fwrite2(param, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",chr,".txt"), col.names = T, sep="\t", nThread=1)
   
-  rm(list=c("snps","snp_list","res", "df","param","prs"))
+  rm(list=c("snps","snp_list","res", "df","prs"))
   
   progBar(ii, length(allchrom), per=5)
 }
 
 rm(list=c("df_beta_list"))
-if (opt$verbose == 2) cat("\n** Step 2.6 ended for chromosome ", chr, " **\n")
+if (opt$verbose == 2) cat("\n** Step 2.6 ended **\n")
 ############
 ## Step 2.7. Combine all chromosomes
-if (opt$verbose == 2) cat("\n** Step 2.7 started for chromosome ", chr, " **\n")
+if (opt$verbose == 2) cat("\n** Step 2.7 started **\n")
 score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
   chr <- allchrom[j]
   prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
@@ -469,9 +467,9 @@ colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
 # fwrite2(param, paste0(opt$PATH_out,"/before_ensemble/score_param.txt"), col.names = T, sep="\t", nThread=NCORES)
 
-if ( opt$verbose >= 1 ) cat(paste0("PRSs in all tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
+if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
 # if ( opt$verbose >= 1 ) cat(paste0("Their corresponding tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_param.txt \n"))
-if (opt$verbose == 2) cat("\n** Step 2.7 ended for chromosome ", chr, " **\n")
+if (opt$verbose == 2) cat("\n** Step 2.7 ended **\n")
 ################
 if(opt$testing){
   

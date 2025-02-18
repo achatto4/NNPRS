@@ -65,9 +65,9 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     v_l -= (eta_l / total_n) * grad_v;
     
     // Print the gradients for testing at each iteration (first few elements)
-    
-      Rcpp::Rcout << "Iteration " << l << " - grad_u (first few): " << grad_u.head(5).t() << std::endl;
-      Rcpp::Rcout << "Iteration " << l << " - grad_v (first few): " << grad_v.head(5).t() << std::endl;
+    Rcpp::Rcout << "Iteration " << l << " - u_l (first few): " << u_l.head(10).t() << std::endl;
+    Rcpp::Rcout << "Iteration " << l << " - v_l (first few): " << v_l.head(10).t() << std::endl;
+      
     
   }
   
@@ -90,10 +90,6 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     
     h_m -= (eta_m / n0) * grad_h;
     g_m -= (eta_m / n0) * grad_g;
-    
-    // Print the gradients for testing at each iteration (first few elements)
-      Rcpp::Rcout << "Iteration " << m << " - grad_h (first few): " << grad_h.head(5).t() << std::endl;
-      Rcpp::Rcout << "Iteration " << m << " - grad_g (first few): " << grad_g.head(5).t() << std::endl;
     
   }
   

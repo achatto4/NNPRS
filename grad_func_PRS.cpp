@@ -193,7 +193,10 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      );
      
      // Extract beta vector for the target population
-     arma::vec beta_vec = Rcpp::as<arma::vec>(beta_block["hat_beta"]);
+     arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
+     Rcpp::Rcout << "First few elements of beta_block['hat_beta']: " << beta_vec.head(10).t() << std::endl;
+     
+     
      arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
      
      // Element-wise multiplication to apply indexing

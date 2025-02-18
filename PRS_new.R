@@ -395,7 +395,8 @@ print(N0)
   
   # Cleanup
   rm(list = c("r0_block", "R0_block", "rk_block", "Rk_block"))
-  
+  print(head(res))
+  print(summary(res))
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   
   ############

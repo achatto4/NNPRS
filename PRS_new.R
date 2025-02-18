@@ -358,12 +358,12 @@ print(N0)
     indx_block,
     n0 = N0[1],
     nk_list = N0[-1],
-    alpha1 = 0.00001,
-    alpha2 = 0.00001,
-    alpha3 = 0.00001,
-    alpha4 = 0.00001,
-    eta_l = 0.00001,
-    eta_m = 0.00001,
+    alpha1 = 0.001,
+    alpha2 = 0.001,
+    alpha3 = 0.001,
+    alpha4 = 0.001,
+    eta_l = 0.01,
+    eta_m = 0.01,
     max_iter = 10
   )  
     }, error = function(e) {

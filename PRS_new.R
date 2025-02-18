@@ -404,7 +404,7 @@ print(N0)
 
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
   #testing
-  print(head(res$b[[bl]]))
+  print(head(res$b[[2]]))
   
   for (bl in 1:nblock) {
     tmp1 <- res$b[[bl]]  # Extract beta vector for block 'bl'

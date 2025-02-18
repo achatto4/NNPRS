@@ -366,8 +366,8 @@ print(N0)
   }
   
   # Apply function to summ_list and LD_list
-  summ_list <- replace_non_finite(summ_list1)
-  LD_list <- replace_non_finite(LD_list1)
+  summ_list <- replace_non_finite(summ_list)
+  LD_list <- replace_non_finite(LD_list)
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(

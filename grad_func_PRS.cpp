@@ -162,6 +162,24 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        std::min(4, static_cast<int>(Rk_list[i].n_cols) - 1)) 
        << std::endl;
      }
+     
+     // Check dimensions of r0 (first column of summ)
+     Rcpp::Rcout << "Dimension of r0 (summ.col(0)): " << summ.col(0).n_rows << " x " << summ.col(0).n_cols << std::endl;
+     
+     // Check dimensions of R0 (first LD matrix in the list)
+     arma::mat R0 = Rcpp::as<arma::mat>(R[0]);
+     Rcpp::Rcout << "Dimension of R0: " << R0.n_rows << " x " << R0.n_cols << std::endl;
+     
+     // Check dimensions of each rk_list element
+     for (size_t i = 0; i < rk_list.size(); ++i) {
+       Rcpp::Rcout << "Dimension of rk_list[" << i << "]: " << rk_list[i].n_rows << " x " << rk_list[i].n_cols << std::endl;
+     }
+     
+     // Check dimensions of each Rk_list element
+     for (size_t i = 0; i < Rk_list.size(); ++i) {
+       Rcpp::Rcout << "Dimension of Rk_list[" << i << "]: " << Rk_list[i].n_rows << " x " << Rk_list[i].n_cols << std::endl;
+     }
+     
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
        n0, 

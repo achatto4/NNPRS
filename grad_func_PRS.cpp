@@ -135,19 +135,19 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
    int num_blocks = indx_block.size();
    Rcpp::List beta_results(num_blocks);
    
-   // Iterate over summ_list and replace NaNs with 0
-   for (size_t i = 0; i < summ_list.size(); ++i) {
-     arma::mat summ = Rcpp::as<arma::mat>(summ_list[i]);
-     summ.replace(arma::datum::nan, 0); // Replace NaN with 0
-     summ_list[i] = summ; // Store back the modified matrix
-   }
-   
-   // Iterate over LD_list and replace NaNs with 0
-   for (size_t i = 0; i < LD_list.size(); ++i) {
-     arma::mat LD = Rcpp::as<arma::mat>(LD_list[i]);
-     LD.replace(arma::datum::nan, 0); // Replace NaN with 0
-     LD_list[i] = LD; // Store back the modified matrix
-   }
+   // // Iterate over summ_list and replace NaNs with 0
+   // for (size_t i = 0; i < summ_list.size(); ++i) {
+   //   arma::mat summ = Rcpp::as<arma::mat>(summ_list[i]);
+   //   summ.replace(arma::datum::nan, 0); // Replace NaN with 0
+   //   summ_list[i] = summ; // Store back the modified matrix
+   // }
+   // 
+   // // Iterate over LD_list and replace NaNs with 0
+   // for (size_t i = 0; i < LD_list.size(); ++i) {
+   //   arma::mat LD = Rcpp::as<arma::mat>(LD_list[i]);
+   //   LD.replace(arma::datum::nan, 0); // Replace NaN with 0
+   //   LD_list[i] = LD; // Store back the modified matrix
+   // }
    
    for (int bl = 0; bl < num_blocks; ++bl) {
      if (indx_block[bl] == 0) {

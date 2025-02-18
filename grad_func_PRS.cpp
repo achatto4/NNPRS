@@ -155,6 +155,8 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      
      // Dot multiply beta with the first column of indx_mat (target population indicator)
      arma::vec beta_final = beta_vec % indx_mat.col(0);  // Element-wise multiplication
+     Rcpp::Rcout << "First few elements of beta_vec: " << beta_vec.head(10).t() << std::endl;
+     Rcpp::Rcout << "First few elements of indx_mat.col(0): " << indx_mat.col(0).head(10).t() << std::endl;
      
      // Store the final beta vector in the results
      beta_results[bl] = List::create(Named("b") = beta_final);

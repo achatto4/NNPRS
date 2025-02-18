@@ -362,9 +362,9 @@ print(N0)
     alpha2 = 0.001,
     alpha3 = 0.001,
     alpha4 = 0.001,
-    eta_l = 0.01,
-    eta_m = 0.01,
-    max_iter = 10
+    eta_l = 0.001,
+    eta_m = 0.001,
+    max_iter = 1000
   )  
     }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")

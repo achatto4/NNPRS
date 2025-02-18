@@ -358,13 +358,13 @@ print(N0)
     indx_block,
     n0 = N0[1],
     nk_list = N0[-1],
-    alpha1 = 0.01,
-    alpha2 = 0.01,
-    alpha3 = 0.01,
-    alpha4 = 0.01,
-    eta_l = 0.01,
-    eta_m = 0.01,
-    max_iter = 100
+    alpha1 = 0.00001,
+    alpha2 = 0.00001,
+    alpha3 = 0.00001,
+    alpha4 = 0.00001,
+    eta_l = 0.00001,
+    eta_m = 0.00001,
+    max_iter = 10
   )  
     }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")
@@ -419,7 +419,7 @@ print(N0)
   # Final PRS matrix
   prs <- b_tmp
   #testing
-  print(summary(prs))
+  print(table(prs))
   print(dim(prs))
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0

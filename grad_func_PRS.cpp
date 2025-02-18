@@ -120,7 +120,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      double eta_m,
      int max_iter
  ) {
-   int num_blocks = summ_list.size();
+   int num_blocks = indx_block.size();
    List beta_results(num_blocks);
    
    for (int bl = 0; bl < num_blocks; ++bl) {
@@ -152,9 +152,9 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      
      // Extract beta (vector) for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
-     
+     arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
      // Dot multiply beta with the first column of indx_mat (target population indicator)
-     arma::vec beta_final = beta_vec % indx_mat.col(0);  // Element-wise multiplication
+     arma::vec beta_final = beta_vec % indx_binary;  // Element-wise multiplication
      Rcpp::Rcout << "First few elements of beta_vec: " << beta_vec.head(10).t() << std::endl;
      Rcpp::Rcout << "First few elements of indx_mat.col(0): " << indx_mat.col(0).head(10).t() << std::endl;
      

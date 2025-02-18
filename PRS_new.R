@@ -412,14 +412,15 @@ print(N0)
     if (bl == 1) {
       b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
     } else {
-      b_tmp <- rbind(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS matrix
+      b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS matrix
     }
   }
   
   # Final PRS matrix
   prs <- b_tmp
   #testing
-  print(prs)
+  print(length(prs))
+  print(dim(prs))
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0
   prs[prs > 10] <- 0    # Set values greater than 10 to 0

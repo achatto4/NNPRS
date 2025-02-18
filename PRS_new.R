@@ -349,26 +349,6 @@ print(N0)
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
-  # Replace non-finite values in a nested list structure
-  replace_non_finite <- function(lst) {
-    lapply(lst, function(block) {
-      if (is.list(block)) {
-        lapply(block, function(mat) {
-          if (is.matrix(mat) || is.numeric(mat)) {
-            mat[!is.finite(mat)] <- 0
-          }
-          return(mat)
-        })
-      } else {
-        return(block)
-      }
-    })
-  }
-  
-  # Apply function to summ_list and LD_list
-  summ_list <- replace_non_finite(summ_list)
-  LD_list <- replace_non_finite(LD_list)
-  
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,

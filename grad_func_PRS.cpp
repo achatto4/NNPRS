@@ -92,10 +92,9 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     g_m -= (eta_m / n0) * grad_g;
     
     // Print the gradients for testing at each iteration (first few elements)
-    if (m == 0 || m == max_iter / 2 || m == max_iter) {
       Rcpp::Rcout << "Iteration " << m << " - grad_h (first few): " << grad_h.head(5).t() << std::endl;
       Rcpp::Rcout << "Iteration " << m << " - grad_g (first few): " << grad_g.head(5).t() << std::endl;
-    }
+    
   }
   
   arma::vec hat_h = h_m;

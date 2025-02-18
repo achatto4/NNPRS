@@ -146,6 +146,20 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        Rk_list.push_back(Rcpp::as<arma::mat>(R[i]));
      }
      
+     // Check and replace NaN values with 0 in r0, R0, rk_list, and Rk_list
+     summ.col(0).transform([](double val) { return std::isnan(val) ? 0.0 : val; }); // r0
+     arma::mat R0 = Rcpp::as<arma::mat>(R[0]);
+     R0.transform([](double val) { return std::isnan(val) ? 0.0 : val; }); // R0
+     
+     for (auto &rk : rk_list) {
+       rk.transform([](double val) { return std::isnan(val) ? 0.0 : val; }); // Each rk
+     }
+     
+     for (auto &Rk : Rk_list) {
+       Rk.transform([](double val) { return std::isnan(val) ? 0.0 : val; }); // Each Rk
+     }
+     
+     // Testing
      Rcpp::Rcout << "Checking inputs before calling gradient descent..." << std::endl;
      Rcpp::Rcout << "n0: " << n0 << ", total_n: " << std::accumulate(nk_list.begin(), nk_list.end(), 0.0) + n0 << std::endl;
      Rcpp::Rcout << "First few elements of r0: " << summ.col(0).head(10).t() << std::endl;

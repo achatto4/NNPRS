@@ -374,12 +374,12 @@ print(N0)
   # After preparation, pass the adjusted data to the gradient descent function
   # tryCatch({
   #   res <- gradient_descent_transfer_learning_rcpp_PRS(
-  #     n0 = num_samples[1], 
-  #     r0 = r0_block,  # Adjusted r0 for the block
-  #     R0 = R0_block,  # Adjusted R0 for the block
-  #     nk_list = num_samples[-1], 
-  #     rk_list = rk_list, 
-  #     Rk_list = Rk_list, 
+      # n0 = num_samples[1],
+      # r0 = r0_block,  # Adjusted r0 for the block
+      # R0 = R0_block,  # Adjusted R0 for the block
+      # nk_list = num_samples[-1],
+      # rk_list = rk_list,
+      # Rk_list = Rk_list,
       # alpha1 = 0.01,
       # alpha2 = 0.01,
       # alpha3 = 0.01,
@@ -419,7 +419,7 @@ print(N0)
   # Final PRS matrix
   prs <- b_tmp
   #testing
-  print(length(prs))
+  print(summary(prs))
   print(dim(prs))
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0

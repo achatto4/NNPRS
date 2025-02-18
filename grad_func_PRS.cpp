@@ -150,7 +150,18 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      Rcpp::Rcout << "n0: " << n0 << ", total_n: " << std::accumulate(nk_list.begin(), nk_list.end(), 0.0) + n0 << std::endl;
      Rcpp::Rcout << "First few elements of r0: " << summ.col(0).head(10).t() << std::endl;
      Rcpp::Rcout << "First few elements of R0: " << Rcpp::as<arma::mat>(R[0]).submat(0,0,4,4) << std::endl;
+     // Display first few elements of rk_list
+     for (size_t i = 0; i < rk_list.size(); ++i) {
+       Rcpp::Rcout << "First few elements of rk_list[" << i << "]: " << rk_list[i].head(10).t() << std::endl;
+     }
      
+     // Display first few elements of Rk_list
+     for (size_t i = 0; i < Rk_list.size(); ++i) {
+       Rcpp::Rcout << "First few elements of Rk_list[" << i << "] (top-left 5x5 block):\n" 
+                   << Rk_list[i].submat(0, 0, std::min(4, static_cast<int>(Rk_list[i].n_rows) - 1),
+       std::min(4, static_cast<int>(Rk_list[i].n_cols) - 1)) 
+       << std::endl;
+     }
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
        n0, 

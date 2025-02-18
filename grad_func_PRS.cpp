@@ -105,11 +105,11 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
  // Function to apply gradient descent transfer learning across all blocks
  // [[Rcpp::export]]
  Rcpp::List gradient_descent_transfer_learning_all_blocks(
-     List summ_list,
-     List LD_list,
+     Rcpp::List summ_list,
+     Rcpp::List LD_list,
      int M,
-     List indx,
-     IntegerVector indx_block,
+     Rcpp::List indx,
+     Rcpp::IntegerVector indx_block,
      double n0,
      std::vector<double> nk_list,
      double alpha1,
@@ -121,18 +121,20 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      int max_iter
  ) {
    int num_blocks = indx_block.size();
-   List beta_results(num_blocks);
+   Rcpp::List beta_results(num_blocks);
    
    for (int bl = 0; bl < num_blocks; ++bl) {
-     if(indx_block(bl) == 0){
-       beta_results[bl] =  R_NilValue;
-     }else{
+     if (indx_block[bl] == 0) {
+       beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = R_NilValue);
+       continue;
+     }
      
-     arma::mat summ = as<arma::mat>(summ_list[bl]);
-     List R = LD_list[bl];
-     arma::mat indx_mat = as<arma::mat>(indx[bl]);
+     // Extract summary statistics and LD matrices
+     arma::mat summ = Rcpp::as<arma::mat>(summ_list[bl]);
+     Rcpp::List R = LD_list[bl];
+     arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
      
-     // Prepare rk_list: all columns except the first from summ_list[bl]
+     // Prepare rk_list: all columns except the first from summ
      std::vector<arma::vec> rk_list;
      for (size_t i = 1; i < summ.n_cols; ++i) {
        rk_list.push_back(summ.col(i));
@@ -141,28 +143,34 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      // Prepare Rk_list: all LD matrices except the first (target population)
      std::vector<arma::mat> Rk_list;
      for (size_t i = 1; i < R.size(); ++i) {
-       Rk_list.push_back(as<arma::mat>(R[i]));
+       Rk_list.push_back(Rcpp::as<arma::mat>(R[i]));
      }
      
-     // Call the gradient descent transfer learning function
+     // Call gradient descent function with correct inputs
      Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-       n0, summ.col(0), as<arma::mat>(R[0]), nk_list,
-       rk_list, Rk_list,
-       alpha1, alpha2, alpha3, alpha4,
+       n0, 
+       summ.col(0), // r0 is the first column
+       Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+       nk_list, 
+       rk_list, 
+       Rk_list,
+       alpha1, alpha2, alpha3, alpha4, 
        eta_l, eta_m, max_iter
      );
      
-     // Extract beta (vector) for the target population
-     arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
+     // Extract beta vector for the target population
+     arma::vec beta_vec = Rcpp::as<arma::vec>(beta_block["hat_beta"]);
      arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
-     // Dot multiply beta with the first column of indx_mat (target population indicator)
-     arma::vec beta_final = beta_vec % indx_binary;  // Element-wise multiplication
+     
+     // Element-wise multiplication to apply indexing
+     arma::vec beta_final = beta_vec % indx_binary;
+     
      Rcpp::Rcout << "First few elements of beta_vec: " << beta_vec.head(10).t() << std::endl;
      
      // Store the final beta vector in the results
-     beta_results[bl] = List::create(Named("b") = beta_final);
-     }
+     beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_final);
    }
    
    return beta_results;
  }
+ 

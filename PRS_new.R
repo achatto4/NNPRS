@@ -395,8 +395,6 @@ print(N0)
   
   # Cleanup
   rm(list = c("r0_block", "R0_block", "rk_block", "Rk_block"))
-  print(head(res))
-  print(summary(res))
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   
   ############
@@ -405,7 +403,7 @@ print(N0)
 
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
   for (bl in 1:nblock) {
-    tmp1 <- res$b[[bl]]  # Extract beta vector for block 'bl'
+    tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
     tmp2 <- snps_scale[[bl]]  # SNP scaling for block 'bl'
     tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
     

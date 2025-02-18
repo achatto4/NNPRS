@@ -348,7 +348,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
-  res <- gradient_descent_transfer_learning_all_blocks(
+  tryCatch({
+    res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,
     LD_list,
     M,
@@ -363,7 +364,11 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = 0.01,
     eta_m = 0.01,
     max_iter = 100
-  )
+  )  
+    }, error = function(e) {
+    cat("Error encountered during gradient descent for chromosome", chr, "\n")
+    cat("Error message:", e$message, "\n")
+  })
   
   # After preparation, pass the adjusted data to the gradient descent function
   # tryCatch({

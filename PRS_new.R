@@ -57,7 +57,7 @@ option_list = list(
   
 )
 opt = parse_args(OptionParser(option_list=option_list))
-num_samples <- as.numeric(unlist(strsplit(opt$num_samples, ",")))
+# num_samples <- as.numeric(unlist(strsplit(opt$num_samples, ",")))
 
 NCORES <- opt$NCORES
 

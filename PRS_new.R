@@ -404,14 +404,15 @@ print(N0)
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
   for (bl in 1:nblock) {
     tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
-    tmp2 <- snps_scale[[bl]]  # SNP scaling for block 'bl'
+    tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
+    dim(res[[bl]]$b);dim(snps_scale[[bl]])
     tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
     
     # Multiply beta vector (tmp1) by SNP scaling (tmp2)
     if (bl == 1) {
       b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
     } else {
-      b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS matrix
+      b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
     }
   }
   

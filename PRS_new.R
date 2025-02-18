@@ -403,9 +403,6 @@ print(N0)
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
 
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
-  #testing
-  print(head(res$b[[2]]))
-  
   for (bl in 1:nblock) {
     tmp1 <- res$b[[bl]]  # Extract beta vector for block 'bl'
     tmp2 <- snps_scale[[bl]]  # SNP scaling for block 'bl'
@@ -421,7 +418,8 @@ print(N0)
   
   # Final PRS matrix
   prs <- b_tmp
-  
+  #testing
+  prs
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0
   prs[prs > 10] <- 0    # Set values greater than 10 to 0

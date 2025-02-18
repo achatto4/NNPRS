@@ -151,7 +151,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      );
      
      // Extract beta (vector) for the target population
-     arma::vec beta_vec = as<arma::vec>(beta_block["b"]);
+     arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
      
      // Dot multiply beta with the first column of indx_mat (target population indicator)
      arma::vec beta_final = beta_vec % indx_mat.col(0);  // Element-wise multiplication

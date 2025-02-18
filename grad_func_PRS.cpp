@@ -1,5 +1,7 @@
 #include <RcppArmadillo.h>
+#include <cmath> // For std::isnan()
 using namespace Rcpp;
+
 
 // [[Rcpp::depends(RcppArmadillo)]]
 
@@ -109,6 +111,10 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
   );
 }
  
+ // [[Rcpp::export]]
+ void replace_nan_with_zero(arma::mat &mat) {
+   mat.elem(arma::find_nonfinite(mat)).zeros(); // Replace NaN and Inf with 0
+ }
  
  // Function to apply gradient descent transfer learning across all blocks
  // [[Rcpp::export]]
@@ -137,21 +143,44 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        continue;
      }
      
+     // // Extract summary statistics and LD matrices
+     // arma::mat summ = Rcpp::as<arma::mat>(summ_list[bl]);
+     // Rcpp::List R = LD_list[bl];
+     // arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
+     // 
+     // // Prepare rk_list: all columns except the first from summ
+     // std::vector<arma::vec> rk_list;
+     // for (size_t i = 1; i < summ.n_cols; ++i) {
+     //   rk_list.push_back(summ.col(i));
+     // }
+     // 
+     // // Prepare Rk_list: all LD matrices except the first (target population)
+     // std::vector<arma::mat> Rk_list;
+     // for (size_t i = 1; i < R.size(); ++i) {
+     //   Rk_list.push_back(Rcpp::as<arma::mat>(R[i]));
+     // }
+     
      // Extract summary statistics and LD matrices
      arma::mat summ = Rcpp::as<arma::mat>(summ_list[bl]);
-     Rcpp::List R = LD_list[bl];
+     replace_nan_with_zero(summ); // Ensure no NaNs
      arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
+     
+     Rcpp::List R = LD_list[bl];
      
      // Prepare rk_list: all columns except the first from summ
      std::vector<arma::vec> rk_list;
      for (size_t i = 1; i < summ.n_cols; ++i) {
-       rk_list.push_back(summ.col(i));
+       arma::vec col = summ.col(i);
+       col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
+       rk_list.push_back(col);
      }
      
      // Prepare Rk_list: all LD matrices except the first (target population)
      std::vector<arma::mat> Rk_list;
      for (size_t i = 1; i < R.size(); ++i) {
-       Rk_list.push_back(Rcpp::as<arma::mat>(R[i]));
+       arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
+       replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
+       Rk_list.push_back(Rk);
      }
      
      // Testing

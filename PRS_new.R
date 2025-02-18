@@ -13,20 +13,20 @@ suppressMessages(library("doMC"))
 suppressMessages(library("foreach"))
 
 # ## progress bar function from https://stackoverflow.com/questions/51213293/is-it-possible-to-get-a-progress-bar-with-foreach-and-a-multicore-kind-of-back
-# progBar <- function(ii, N, per = 10) {
-#   #ii is current iteration.
-#   #N is total number of iterations to perform.
-#   #per is step (percent) when to update the progress bar. We need this as when multiple iterations are being performed progress bar gets updated too often and output is messed up.
-#   if (ii %in% seq(1, N, per)) {
-#     x <- round(ii * 100 / N)
-#     message("[ ",
-#             paste(rep("=", x), collapse = ""),
-#             paste(rep("-", 100 - x), collapse = ""),
-#             " ] ", x, "%", "\r",
-#             appendLF = FALSE)
-#     if (ii == N) cat("\r")
-#   }
-# }
+progBar <- function(ii, N, per = 10) {
+  #ii is current iteration.
+  #N is total number of iterations to perform.
+  #per is step (percent) when to update the progress bar. We need this as when multiple iterations are being performed progress bar gets updated too often and output is messed up.
+  if (ii %in% seq(1, N, per)) {
+    x <- round(ii * 100 / N)
+    message("[ ",
+            paste(rep("=", x), collapse = ""),
+            paste(rep("-", 100 - x), collapse = ""),
+            " ] ", x, "%", "\r",
+            appendLF = FALSE)
+    if (ii == N) cat("\r")
+  }
+}
 
 
 option_list = list(
@@ -227,8 +227,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
   
-  #nblock <- length(LD_list0[[l]])
-  nblock = 1
+  nblock <- length(LD_list0[[l]])
   if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.2. Transform to standard data format
@@ -349,66 +348,44 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   
-  # Initialize r0 and R0 for each chromosome before the loop
-  r0 <- numeric(Nsnps[bl])  # Adjust size as necessary
-  R0 <- matrix(0, nrow = Nsnps[bl], ncol = Nsnps[bl])  # Adjust dimensions accordingly
-  
-  # Adjusting the SNP alignment across ethnicities using indx
-  for (bl in 1:nblock) {
-    if (indx_block[bl] == 1) {
-      snp_indices <- indx[[bl]]
-      
-      # Subset data based on the SNP indices
-      r0_block <- r0[snp_indices]  # Subset r0 using snp_indices
-      R0_block <- R0[snp_indices, snp_indices, drop = FALSE]  # Subset R0 matrix
-      
-      # Check if r0_block is a vector (important for gradient descent)
-      if (!is.vector(r0_block)) {
-        stop(paste("Error: r0_block for block", bl, "is not a vector."))
-      }
-      
-      # Check if R0_block is a matrix (important for gradient descent)
-      if (!is.matrix(R0_block)) {
-        stop(paste("Error: R0_block for block", bl, "is not a matrix."))
-      }
-      
-      # Ensure all elements in rk_list are vectors, and Rk_list are matrices
-      rk_block <- lapply(rk_list, function(x) x[snp_indices])
-      Rk_block <- lapply(Rk_list, function(x) x[snp_indices, snp_indices, drop = FALSE])
-      
-      # Validation check for rk_list and Rk_list
-      for (k in 1:length(rk_block)) {
-        if (!is.vector(rk_block[[k]])) stop("Error: rk_list element is not a vector!")
-        if (!is.matrix(Rk_block[[k]])) stop("Error: Rk_list element is not a matrix!")
-      }
-      
-      # Update the lists for the gradient descent function
-      rk_list[[bl]] <- rk_block
-      Rk_list[[bl]] <- Rk_block
-    }
-  }
+  res <- gradient_descent_transfer_learning_all_blocks(
+    summ_list,
+    LD_list,
+    M,
+    indx,
+    indx_block,
+    n0 = num_samples[1],
+    nk_list = num_samples[-1],
+    alpha1 = 0.01,
+    alpha2 = 0.01,
+    alpha3 = 0.01,
+    alpha4 = 0.01,
+    eta_l = 0.01,
+    eta_m = 0.01,
+    max_iter = 100
+  )
   
   # After preparation, pass the adjusted data to the gradient descent function
-  tryCatch({
-    res <- gradient_descent_transfer_learning_rcpp_PRS(
-      n0 = num_samples[1], 
-      r0 = r0_block,  # Adjusted r0 for the block
-      R0 = R0_block,  # Adjusted R0 for the block
-      nk_list = num_samples[-1], 
-      rk_list = rk_list, 
-      Rk_list = Rk_list, 
-      alpha1 = 0.01, 
-      alpha2 = 0.01, 
-      alpha3 = 0.01, 
-      alpha4 = 0.01, 
-      eta_l = 0.01, 
-      eta_m = 0.01, 
-      max_iter = 100
-    )
-  }, error = function(e) {
-    cat("Error encountered during gradient descent for chromosome", chr, "\n")
-    cat("Error message:", e$message, "\n")
-  })
+  # tryCatch({
+  #   res <- gradient_descent_transfer_learning_rcpp_PRS(
+  #     n0 = num_samples[1], 
+  #     r0 = r0_block,  # Adjusted r0 for the block
+  #     R0 = R0_block,  # Adjusted R0 for the block
+  #     nk_list = num_samples[-1], 
+  #     rk_list = rk_list, 
+  #     Rk_list = Rk_list, 
+      # alpha1 = 0.01,
+      # alpha2 = 0.01,
+      # alpha3 = 0.01,
+      # alpha4 = 0.01,
+      # eta_l = 0.01,
+      # eta_m = 0.01,
+      # max_iter = 100
+  #   )
+  # }, error = function(e) {
+  #   cat("Error encountered during gradient descent for chromosome", chr, "\n")
+  #   cat("Error message:", e$message, "\n")
+  # })
   
   # Cleanup
   rm(list = c("r0_block", "R0_block", "rk_block", "Rk_block"))
@@ -418,21 +395,35 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   ############
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
-  prs <- res$b * snps_scale  # Element-wise multiplication
-  prs[is.na(prs)] <- 0       # Replace NA values with 0
-  prs[prs > 10] <- 0         # Thresholding extreme values
-  prs[prs < -10] <- 0
+
+  # Step 2.4. Clean PRSs into a matrix (#variant X #block)
+  
+  for (bl in 1:nblock) {
+    tmp1 <- res$b[[bl]]  # Extract beta vector for block 'bl'
+    tmp2 <- snps_scale[[bl]]  # SNP scaling for block 'bl'
+    tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
+    
+    # Multiply beta vector (tmp1) by SNP scaling (tmp2)
+    if (bl == 1) {
+      b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
+    } else {
+      b_tmp <- rbind(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS matrix
+    }
+  }
+  
+  # Final PRS matrix
+  prs <- b_tmp
+  
+  # Clean the PRS matrix
+  prs[is.na(prs)] <- 0  # Set NA values to 0
+  prs[prs > 10] <- 0    # Set values greater than 10 to 0
+  prs[prs < -10] <- 0   # Set values less than -10 to 0
+  
+  # Clean up temporary variables
+  rm(list = c("tmp1", "tmp2", "b_tmp"))
+  
   if (opt$verbose == 2) cat("\n** Step 2.4 ended for chromosome ", chr, " **\n")
   ############
-  ## Step 2.5. Summarize tuning parameter setting for each grid search
-  # 
-  # param <- matrix(nrow=Ngridsearch*M, ncol = 2*M+2)
-  # for (m in 1:M){ param[,m] <- delta[m] }
-  # for (m in 1:M){ param[,(M+m)] <- res$lambda[m,] }
-  # param[,(2*M+1)] <- rep(unlist(lapply(res$c, FUN = function (x){x[1,2]})), each=M)
-  # param[,(2*M+2)] <- apply(prs, MARGIN = 2, FUN = function (x){mean(x!=0)})
-  # colnames(param) <- c(paste0("delta_",ethnic), paste0("lambda_",ethnic), "c","sparsity_nonzero_percentage")
-  # param <- data.frame(score_origin = rep(ethnic, Ngridsearch), param)
   
   ############
   ## Step 2.6. Save files
@@ -463,17 +454,17 @@ score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
   return(prs)
 }
 registerDoMC(1)
-param <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",allchrom[1],".txt"))
-param[,ncol(param)] <- apply(score[,-1:-3], MARGIN = 2, FUN = function (x){mean(x!=0)})
+# param <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",allchrom[1],".txt"))
+# param[,ncol(param)] <- apply(score[,-1:-3], MARGIN = 2, FUN = function (x){mean(x!=0)})
 tmp <- apply(score[,-1:-3], MARGIN=1, function(x){sum(x!=0)}); m <- !(tmp==0)
 score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
-fwrite2(param, paste0(opt$PATH_out,"/before_ensemble/score_param.txt"), col.names = T, sep="\t", nThread=NCORES)
+# fwrite2(param, paste0(opt$PATH_out,"/before_ensemble/score_param.txt"), col.names = T, sep="\t", nThread=NCORES)
 
 if ( opt$verbose >= 1 ) cat(paste0("PRSs in all tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
-if ( opt$verbose >= 1 ) cat(paste0("Their corresponding tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_param.txt \n"))
-if (opt$verbose == 2) cat("\n** Step 2.8 started for chromosome ", chr, " **\n")
+# if ( opt$verbose >= 1 ) cat(paste0("Their corresponding tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_param.txt \n"))
+if (opt$verbose == 2) cat("\n** Step 2.7 ended for chromosome ", chr, " **\n")
 ################
 if(opt$testing){
   

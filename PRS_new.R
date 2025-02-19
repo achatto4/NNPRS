@@ -40,8 +40,8 @@ option_list = list(
               help="Full path and the file name of the GWAS summary statistics, separated by comma [required] [must have columns: rsid, chr, beta, beta_se, a1, a0, n_eff]"),
   make_option("--pop", action="store", default=NA, type='character',
               help="Population of the GWAS sample, separated by comma [required]"),
-  # make_option("--num_samples", action="store", default=NA, type='character',
-  #             help="Population-wise number of samples (comma-separated values), first for target"),
+  make_option("--num_samples", action="store", default=NA, type='character',
+              help="Population-wise number of samples (comma-separated values), first for target"),
   make_option("--chrom", action="store", default="1-22", type='character',
               help="The chromosome on which the model is fitted, separated by comma or dash for consecutive chromosomes [required]"),
   make_option("--verbose", action="store", default=1, type="integer",
@@ -61,7 +61,7 @@ option_list = list(
   
 )
 opt = parse_args(OptionParser(option_list=option_list))
-# num_samples <- as.numeric(unlist(strsplit(opt$num_samples, ",")))
+num_samples <- as.numeric(unlist(strsplit(opt$num_samples, ",")))
 
 NCORES <- opt$NCORES
 
@@ -90,6 +90,7 @@ if(! dir.exists(opt$PATH_out)){
 suppressWarnings(dir.create(paste0(opt$PATH_out, "/tmp")))
 suppressWarnings(dir.create(paste0(opt$PATH_out, "/tmp/PRS_in_all_settings_bychrom")))
 suppressWarnings(dir.create(paste0(opt$PATH_out, "/before_ensemble")))
+suppressWarnings(dir.create(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1])))
 
 sourceCpp("/dcs04/nilanjan/data/Anagh/PRS_proj/code_github/Promit_projects/grad_func_PRS.cpp")
 
@@ -143,35 +144,6 @@ for (l in 1:M){
   
   rm(list = c("df_beta","ref_tmp","tmp0","tmp1","tmp2","flip","keep"))
 }
-
-############
-# ## Step 1.2. Load optimal tuning parameter from the single-ancestry analaysis
-# 
-# delta <- numeric(length = M)
-# lambda <- numeric(length = M)
-# for (l in 1:M){
-#   tmp <- fread2(lassosum_param_path[l])
-#   delta[l] <- tmp$delta0
-#   lambda[l] <- tmp$lambda0
-#   rm(list=c("tmp"))
-# }
-
-############
-## Step 1.3. Set parameter path
-
-# # Parameter path for lambda
-# lambdapath <- matrix(nrow = M, ncol = Ll)
-# for (l in 1:M){
-#   lambdapath[l,] <- r_path(rmax = min(summ_max/lambda), rmin = min(0.001/lambda), nr=Ll ) * lambda[l]
-# }
-# 
-# # Parameter path for c
-# cpath_tmp <- c_path(maxc=100, minc=2, nc=Lc)
-# cpath <- list()
-# for (lc in 1:Lc){
-#   cpath[[lc]] <- matrix(cpath_tmp[lc],ncol = M, nrow = M)
-# }
-
 
 ########################################################################
 ########################################################################
@@ -295,60 +267,9 @@ print(N0)
   rm(list=c("summ_list1","snps_scale1","LD_list1","indx1","indx_block1","snp_list1","Nsnps1",
             "Nsnps0","snps_list0","snps_scale0","summ_list0","l","LD_list0","tmp"))
   if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
-  ############
-  #2.3
-  # Organize data in a structure fit for the algorithm
-  # if (opt$verbose == 2) cat("\n** Step 2.2 started for chromosome ", chr, " **\n")
-  # snp_list <- character()
-  # Nsnps <- 0
-  # indx <- matrix(nrow = 0, ncol = M)
-  # summ_list <- matrix(nrow = 0, ncol = M)
-  # snps_scale <- matrix(nrow = 0, ncol = M)
-  # LD_list <- vector("list", length = M)
-  # 
-  # # Collect all SNPs across M datasets
-  # tmp <- character()
-  # for (l in 1:M){
-  #   if (!is.null(snps_list0[[l]])) {
-  #     tmp <- c(tmp, unlist(snps_list0[[l]]))
-  #   }
-  # }
-  # snp_list <- unique(tmp)
-  # Nsnps <- length(snp_list)
-  # 
-  # if (Nsnps > 0) {
-  #   indx <- matrix(nrow = Nsnps, ncol = M)
-  #   summ_list <- matrix(nrow = Nsnps, ncol = M)
-  #   snps_scale <- matrix(nrow = Nsnps, ncol = M)
-  #   LD_list <- vector("list", length = M)
-  #   
-  #   for (l in 1:M){
-  #     m <- match(snp_list, unlist(snps_list0[[l]]))
-  #     m1 <- m; m1[is.na(m1)] <- 0; indx[,l] <- m1
-  #     summ_list[,l] <- if (!is.null(summ_list0[[l]])) summ_list0[[l]][m] else 0
-  #     snps_scale[,l] <- if (!is.null(snps_scale0[[l]])) snps_scale0[[l]][m] else 0
-  #     
-  #     if (!is.null(LD_list0[[l]])) {
-  #       m1 <- as.matrix(LD_list0[[l]][m,m])
-  #       m1[is.na(m1)] <- 0
-  #       diag(m1)[is.na(m)] <- 1
-  #       LD_list[[l]] <- m1
-  #     }
-  #   }
-  # }
-  # 
-  # N <- N0
-  # 
-  # rm(list = c("snps_list0", "snps_scale0", "summ_list0", "LD_list0", "tmp", "m1"))
-  # if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
+  
   ############
   ## Step 2.3. Run algorithm
-  
-  # enet_multiethnic(summ=summ_list, R=LD_list,
-  # M=M, indx=indx,
-  # indx_block=indx_block,
-  # delta=delta, lambdapath=lambdapath, cpath=cpath,
-  # verbose=opt$verbose)
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
@@ -374,28 +295,6 @@ print(N0)
     cat("Error encountered during gradient descent for chromosome", chr, "\n")
     cat("Error message:", e$message, "\n")
   })
-  
-  # After preparation, pass the adjusted data to the gradient descent function
-  # tryCatch({
-  #   res <- gradient_descent_transfer_learning_rcpp_PRS(
-      # n0 = num_samples[1],
-      # r0 = r0_block,  # Adjusted r0 for the block
-      # R0 = R0_block,  # Adjusted R0 for the block
-      # nk_list = num_samples[-1],
-      # rk_list = rk_list,
-      # Rk_list = Rk_list,
-      # alpha1 = 0.01,
-      # alpha2 = 0.01,
-      # alpha3 = 0.01,
-      # alpha4 = 0.01,
-      # eta_l = 0.01,
-      # eta_m = 0.01,
-      # max_iter = 100
-  #   )
-  # }, error = function(e) {
-  #   cat("Error encountered during gradient descent for chromosome", chr, "\n")
-  #   cat("Error message:", e$message, "\n")
-  # })
   
   if (opt$verbose == 2) cat("\n** Step 2.3 ended for chromosome ", chr, " **\n")
   
@@ -444,7 +343,6 @@ print(N0)
   df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
   
   fwrite2(df, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"), col.names = F, sep="\t", nThread=1)
-  #fwrite2(param, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",chr,".txt"), col.names = T, sep="\t", nThread=1)
   
   rm(list=c("snps","snp_list","res", "df","prs"))
   
@@ -462,17 +360,12 @@ score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
   return(prs)
 }
 registerDoMC(1)
-# param <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",allchrom[1],".txt"))
-# param[,ncol(param)] <- apply(score[,-1:-3], MARGIN = 2, FUN = function (x){mean(x!=0)})
-#tmp <- apply(score[,-1:-3], MARGIN=1, function(x){sum(x!=0)}); m <- !(tmp==0)
 tmp <- score[,4] != 0; m <- !(tmp==0)
 score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
-# fwrite2(param, paste0(opt$PATH_out,"/before_ensemble/score_param.txt"), col.names = T, sep="\t", nThread=NCORES)
 
 if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
-# if ( opt$verbose >= 1 ) cat(paste0("Their corresponding tuning parameter settings are saved in ", opt$PATH_out,"/before_ensemble/score_param.txt \n"))
 if (opt$verbose == 2) cat("\n** Step 2.7 ended **\n")
 ################
 if(opt$testing){
@@ -538,25 +431,13 @@ if(opt$testing){
   SCORE_id <- SCORE[,1:4]
   SCORE <- SCORE[,-1:-4]
   if (opt$verbose == 2) cat("\n** score vec derived **\n")
-  #colnames(SCORE) <- "score"
-  
-  #if(length(score_drop)>0){ SCORE <- SCORE[,-score_drop,drop=F] }
-  
-  # Predictions of ensembled scores from PROSPER on testing samples
-  #after_ensemble_testing <- cbind(pheno[,1:2], ensemble_score = predict(sl, SCORE, onlySL = TRUE)[[1]])
-  #fwrite2(after_ensemble_testing, paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt"), col.names = T, sep="\t", nThread=NCORES)
-  #if ( opt$verbose == 2 ) cat(paste0("Predicted PROSPER scores for testing samples is saved in ", opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt \n"))
   
   # Get testing R2
   fit <- lm(pheno[,3]~SCORE)
   R2 <- summary(fit)$r.square
   print(R2)
-  # R2_res <- cbind(R2_res,data.frame(testing_R2=R2))
-  # 
-  # fwrite2(R2_res, paste0(opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt"), col.names = T, sep="\t", nThread=NCORES)
-  # 
-  # if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! R2 is saved in ", opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt \n"))
-  # 
+  # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
+   if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 }
 
 # if(opt$cleanup){

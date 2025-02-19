@@ -79,6 +79,8 @@ generate_synthetic_data <- function(n, p, beta = beta1) {
   return(list(R = R, r = r))
 }
 
+
+
 # Parameters
 p <- 1000  # Number of SNPs (keeping it small for simplicity)
 n_EUR <- 10000  # Sample size for EUR

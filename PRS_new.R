@@ -366,7 +366,7 @@ print(N0)
     alpha2 = 0.001,
     alpha3 = 0.001,
     alpha4 = 0.001,
-    eta_l = 0.001,
+    eta_l = 0.001, #Use ADAM
     eta_m = 0.001,
     max_iter = 1000
   )  
@@ -533,27 +533,28 @@ if(opt$testing){
   SCORE <- SCORE[m[m.keep],]
   SCORE_id <- SCORE[,1:4]
   SCORE <- SCORE[,-1:-4]
-  colnames(SCORE) <- "score"
+  #colnames(SCORE) <- "score"
   
   #if(length(score_drop)>0){ SCORE <- SCORE[,-score_drop,drop=F] }
   
   # Predictions of ensembled scores from PROSPER on testing samples
-  after_ensemble_testing <- cbind(pheno[,1:2], ensemble_score = predict(sl, SCORE, onlySL = TRUE)[[1]])
-  fwrite2(after_ensemble_testing, paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt"), col.names = T, sep="\t", nThread=NCORES)
-  if ( opt$verbose == 2 ) cat(paste0("Predicted PROSPER scores for testing samples is saved in ", opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt \n"))
+  #after_ensemble_testing <- cbind(pheno[,1:2], ensemble_score = predict(sl, SCORE, onlySL = TRUE)[[1]])
+  #fwrite2(after_ensemble_testing, paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt"), col.names = T, sep="\t", nThread=NCORES)
+  #if ( opt$verbose == 2 ) cat(paste0("Predicted PROSPER scores for testing samples is saved in ", opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt \n"))
   
   # Get testing R2
-  fit <- lm(pheno[,3]~after_ensemble_testing$ensemble_score)
+  fit <- lm(pheno[,3]~SCORE)
   R2 <- summary(fit)$r.square
-  R2_res <- cbind(R2_res,data.frame(testing_R2=R2))
-  
-  fwrite2(R2_res, paste0(opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt"), col.names = T, sep="\t", nThread=NCORES)
-  
-  if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! R2 is saved in ", opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt \n"))
-  
+  print(R2)
+  # R2_res <- cbind(R2_res,data.frame(testing_R2=R2))
+  # 
+  # fwrite2(R2_res, paste0(opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt"), col.names = T, sep="\t", nThread=NCORES)
+  # 
+  # if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! R2 is saved in ", opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt \n"))
+  # 
 }
 
-if(opt$cleanup){
-  arg = paste0("rm -rf " , opt$PATH_out, "/tmp")
-  system(arg)
-}
+# if(opt$cleanup){
+#   arg = paste0("rm -rf " , opt$PATH_out, "/tmp")
+#   system(arg)
+# }

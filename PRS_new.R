@@ -460,7 +460,8 @@ score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
 registerDoMC(1)
 # param <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/param_chr",allchrom[1],".txt"))
 # param[,ncol(param)] <- apply(score[,-1:-3], MARGIN = 2, FUN = function (x){mean(x!=0)})
-tmp <- apply(score[,-1:-3], MARGIN=1, function(x){sum(x!=0)}); m <- !(tmp==0)
+#tmp <- apply(score[,-1:-3], MARGIN=1, function(x){sum(x!=0)}); m <- !(tmp==0)
+tmp <- score[,4] != 0; m <- !(tmp==0)
 score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)

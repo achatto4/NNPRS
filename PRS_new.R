@@ -55,7 +55,9 @@ option_list = list(
   make_option("--covar_testing", action="store", default=NA, type='character',
               help="Path to quantitative covariates for testing (PLINK format) [optional]"),
   make_option("--testing", action="store", default=F, type='logical',
-              help="Whether to perform testing in seperate dataset [required]")
+              help="Whether to perform testing in seperate dataset [required]"),
+  make_option("--cleanup", action="store", default=T, type="logical",
+              help="Cleanup temporary files or not [default: %default]")
   
 )
 opt = parse_args(OptionParser(option_list=option_list))
@@ -519,7 +521,8 @@ if(opt$testing){
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/before_ensemble_testing")
-  system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)
+  # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)
+  system(arg, ignore.stdout = TRUE, ignore.stderr = TRUE)
   
   SCORE <- fread2(paste0(opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/before_ensemble_testing.sscore"))
   

@@ -477,7 +477,7 @@ if(opt$testing){
   
   ############
   ## Step 3.1. Load data
-  
+  if (opt$verbose == 2) cat("\n** Step 3.1 started **\n")
   # Make/fetch the phenotype file
   fam <- read.table(paste(opt$bfile_testing,".fam",sep=''),as.is=T)
   if ( !is.na(opt$pheno_testing) ) {
@@ -508,10 +508,10 @@ if(opt$testing){
     if ( opt$verbose >= 1 ) cat( reg$r.sq , "variance in phenotype explained by covariates in testing samples \n" )
     pheno[,3] <- scale(reg$resid)
   }
-  
+  if (opt$verbose == 2) cat("\n** Step 3.1 ended **\n")
   ############
   ## Step 3.2. Calculate scores for all tuning parameter settings on tuning samples
-  
+  if (opt$verbose == 2) cat("\n** Step 3.2 started  **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",

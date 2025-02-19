@@ -516,6 +516,7 @@ if(opt$testing){
   ############
   ## Step 3.2. Calculate scores for all tuning parameter settings on tuning samples
   if (opt$verbose == 2) cat("\n** Step 3.2 started  **\n")
+  if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
@@ -523,7 +524,10 @@ if(opt$testing){
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")
   # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)
   system(arg, ignore.stdout = TRUE, ignore.stderr = TRUE)
-  
+  if (opt$verbose == 2) cat("\n** PLINK step ended **\n")
+  if (!file.exists(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing.sscore"))) {
+    stop("Error: PLINK output file does not exist. Check if PLINK ran successfully.")
+  }
   SCORE <- fread2(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing.sscore"))
   
   m <- match( paste(fam[,1],fam[,2]) , paste(SCORE[,1],SCORE[,2]) )
@@ -533,6 +537,7 @@ if(opt$testing){
   SCORE <- SCORE[m[m.keep],]
   SCORE_id <- SCORE[,1:4]
   SCORE <- SCORE[,-1:-4]
+  if (opt$verbose == 2) cat("\n** score vec derived **\n")
   #colnames(SCORE) <- "score"
   
   #if(length(score_drop)>0){ SCORE <- SCORE[,-score_drop,drop=F] }

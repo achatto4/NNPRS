@@ -520,11 +520,11 @@ if(opt$testing){
                 " --bfile ",opt$bfile_testing,
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
-                " --out ",opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/before_ensemble_testing")
+                " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")
   # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)
   system(arg, ignore.stdout = TRUE, ignore.stderr = TRUE)
   
-  SCORE <- fread2(paste0(opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/before_ensemble_testing.sscore"))
+  SCORE <- fread2(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing.sscore"))
   
   m <- match( paste(fam[,1],fam[,2]) , paste(SCORE[,1],SCORE[,2]) )
   m.keep <- !is.na(m)
@@ -539,17 +539,17 @@ if(opt$testing){
   
   # Predictions of ensembled scores from PROSPER on testing samples
   after_ensemble_testing <- cbind(pheno[,1:2], ensemble_score = predict(sl, SCORE, onlySL = TRUE)[[1]])
-  fwrite2(after_ensemble_testing, paste0(opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/after_ensemble_testing.txt"), col.names = T, sep="\t", nThread=NCORES)
-  if ( opt$verbose == 2 ) cat(paste0("Predicted PROSPER scores for testing samples is saved in ", opt$PATH_out,"/tmp/sample_scores_",opt$prefix,"/after_ensemble_testing.txt \n"))
+  fwrite2(after_ensemble_testing, paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt"), col.names = T, sep="\t", nThread=NCORES)
+  if ( opt$verbose == 2 ) cat(paste0("Predicted PROSPER scores for testing samples is saved in ", opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/after_ensemble_testing.txt \n"))
   
   # Get testing R2
   fit <- lm(pheno[,3]~after_ensemble_testing$ensemble_score)
   R2 <- summary(fit)$r.square
   R2_res <- cbind(R2_res,data.frame(testing_R2=R2))
   
-  fwrite2(R2_res, paste0(opt$PATH_out,"/after_ensemble_",opt$prefix,"/R2.txt"), col.names = T, sep="\t", nThread=NCORES)
+  fwrite2(R2_res, paste0(opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt"), col.names = T, sep="\t", nThread=NCORES)
   
-  if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! R2 is saved in ", opt$PATH_out,"/after_ensemble_",opt$prefix,"/R2.txt \n"))
+  if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! R2 is saved in ", opt$PATH_out,"/after_ensemble_",ethnic[1],"/R2.txt \n"))
   
 }
 

@@ -417,13 +417,12 @@ print(N0)
   # Final PRS matrix
   prs <- b_tmp
   #testing
-  print(table(prs))
-  print(length(prs))
+  
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0
   prs[prs > 10] <- 0    # Set values greater than 10 to 0
   prs[prs < -10] <- 0   # Set values less than -10 to 0
-  
+  print(summary(prs))
   # Clean up temporary variables
   rm(list = c("tmp1", "tmp2", "b_tmp"))
   

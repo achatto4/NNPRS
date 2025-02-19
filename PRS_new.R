@@ -533,9 +533,9 @@ if(opt$testing){
   SCORE <- SCORE[m[m.keep],]
   SCORE_id <- SCORE[,1:4]
   SCORE <- SCORE[,-1:-4]
-  colnames(SCORE) <- paste0("score",1:ncol(SCORE))
+  colnames(SCORE) <- "score"
   
-  if(length(score_drop)>0){ SCORE <- SCORE[,-score_drop,drop=F] }
+  #if(length(score_drop)>0){ SCORE <- SCORE[,-score_drop,drop=F] }
   
   # Predictions of ensembled scores from PROSPER on testing samples
   after_ensemble_testing <- cbind(pheno[,1:2], ensemble_score = predict(sl, SCORE, onlySL = TRUE)[[1]])

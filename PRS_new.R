@@ -154,6 +154,18 @@ registerDoMC(NCORES)
 
 # Run algorithm parallelled by chromosomes
 
+# Initialize a data frame to store R^2 values
+results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
+
+# Define parameter grids
+iters <- c(100, 1000, 10000)
+etas <- c(0.01, 0.001, 0.0001)  # Use same eta for all
+alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
+
+for (iter in iters) {
+  for (eta in etas) {
+    for (alpha in alphas) {
+
 ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) %dopar% {
   
   chr <- allchrom[j]
@@ -273,7 +285,7 @@ print(N0)
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-  
+        
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,
@@ -283,13 +295,13 @@ print(N0)
     indx_block,
     n0 = N0[1],
     nk_list = N0[-1],
-    alpha1 = 0.001,
-    alpha2 = 0.001,
-    alpha3 = 0.001,
-    alpha4 = 0.001,
-    eta_l = 0.001, #Use ADAM
-    eta_m = 0.001,
-    max_iter = 1000
+    alpha1 = alpha,
+    alpha2 = alpha,
+    alpha3 = alpha,
+    alpha4 = alpha,
+    eta_l = eta, #Use ADAM
+    eta_m = eta,
+    max_iter = iter
   )  
     }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")
@@ -435,10 +447,17 @@ if(opt$testing){
   # Get testing R2
   fit <- lm(pheno[,3]~SCORE)
   R2 <- summary(fit)$r.square
-  print(R2)
+  # print(R2)
+  
+  # Store results
+  results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
-   if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 }
+    }
+  }
+}
+write.csv(results, "R2_results.csv", row.names = FALSE)
+if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 
 # if(opt$cleanup){
 #   arg = paste0("rm -rf " , opt$PATH_out, "/tmp")

@@ -100,6 +100,18 @@ sourceCpp("/dcs04/nilanjan/data/Anagh/PRS_proj/code_github/Promit_projects/grad_
 
 if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 
+# Initialize a data frame to store R^2 values
+results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
+
+# Define parameter grids
+iters <- c(100, 1000, 10000)
+etas <- c(0.01, 0.001, 0.0001)  # Use same eta for all
+alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
+
+for (iter in iters) {
+  for (eta in etas) {
+    for (alpha in alphas) {
+
 ############
 ## Step 1.1. Loading summary data and matching to reference data
 
@@ -153,18 +165,6 @@ if ( opt$verbose >= 1 ) cat("\n** Step 2. Fitting models by chromosome **\n")
 registerDoMC(NCORES)
 
 # Run algorithm parallelled by chromosomes
-
-# Initialize a data frame to store R^2 values
-results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
-
-# Define parameter grids
-iters <- c(100, 1000, 10000)
-etas <- c(0.01, 0.001, 0.0001)  # Use same eta for all
-alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
-
-for (iter in iters) {
-  for (eta in etas) {
-    for (alpha in alphas) {
 
 ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) %dopar% {
   
@@ -451,6 +451,7 @@ if(opt$testing){
   
   # Store results
   results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
+  print("results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))")
   # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
     }

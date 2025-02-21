@@ -275,7 +275,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   Nsnps <- Nsnps1
   N <- N0
   #testing
-print(N0)
+  #print(N0)
   rm(list=c("summ_list1","snps_scale1","LD_list1","indx1","indx_block1","snp_list1","Nsnps1",
             "Nsnps0","snps_list0","snps_scale0","summ_list0","l","LD_list0","tmp"))
   if (opt$verbose == 2) cat("\n** Step 2.2 ended for chromosome ", chr, " **\n")
@@ -337,7 +337,7 @@ print(N0)
   prs[is.na(prs)] <- 0  # Set NA values to 0
   prs[prs > 10] <- 0    # Set values greater than 10 to 0
   prs[prs < -10] <- 0   # Set values less than -10 to 0
-  print(summary(prs))
+  #print(summary(prs))
   # Clean up temporary variables
   rm(list = c("tmp1", "tmp2", "b_tmp"))
   
@@ -451,7 +451,7 @@ if(opt$testing){
   
   # Store results
   results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
-  print("results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))")
+  print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
     }

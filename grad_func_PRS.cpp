@@ -109,6 +109,101 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
    mat.elem(arma::find_nonfinite(mat)).zeros(); // Replace NaN and Inf with 0
  }
  
+ 
+ // [[Rcpp::export]]
+ Rcpp::List gradient_descent_transfer_learning_rcpp_ADAM(
+     double n0,
+     arma::vec r0,
+     arma::mat R0,
+     std::vector<double> nk_list,
+     std::vector<arma::vec> rk_list,
+     std::vector<arma::mat> Rk_list,
+     double alpha1,
+     double alpha2,
+     double alpha3,
+     double alpha4,
+     double eta,
+     double beta1,
+     double beta2,
+     double epsilon,
+     int max_iter
+ ) {
+   int p = R0.n_rows;
+   arma::vec u_l = alpha1 * arma::ones<arma::vec>(p);
+   arma::vec v_l = alpha2 * arma::ones<arma::vec>(p);
+   arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+   arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+   
+   arma::vec m_u = arma::zeros<arma::vec>(p), v_u = arma::zeros<arma::vec>(p);
+   arma::vec m_v = arma::zeros<arma::vec>(p), v_v = arma::zeros<arma::vec>(p);
+   arma::vec m_h = arma::zeros<arma::vec>(p), v_h = arma::zeros<arma::vec>(p);
+   arma::vec m_g = arma::zeros<arma::vec>(p), v_g = arma::zeros<arma::vec>(p);
+   
+   for (int l = 1; l <= max_iter; ++l) {
+     arma::vec grad_u = arma::zeros<arma::vec>(p);
+     arma::vec grad_v = arma::zeros<arma::vec>(p);
+     
+     for (size_t k = 0; k < nk_list.size(); ++k) {
+       double nk = nk_list[k];
+       arma::vec rk = rk_list[k];
+       arma::mat Rk = Rk_list[k];
+       
+       arma::vec diff_sq = arma::square(u_l) - arma::square(v_l);
+       grad_u += (-4 * nk * rk % u_l + 4 * nk * (Rk * diff_sq) % u_l);
+       grad_v += (4 * nk * rk % v_l - 4 * nk * (Rk * diff_sq) % v_l);
+     }
+     
+     m_u = beta1 * m_u + (1 - beta1) * grad_u;
+     v_u = beta2 * v_u + (1 - beta2) * arma::square(grad_u);
+     m_v = beta1 * m_v + (1 - beta1) * grad_v;
+     v_v = beta2 * v_v + (1 - beta2) * arma::square(grad_v);
+     
+     arma::vec m_u_hat = m_u / (1 - std::pow(beta1, l));
+     arma::vec v_u_hat = v_u / (1 - std::pow(beta2, l));
+     arma::vec m_v_hat = m_v / (1 - std::pow(beta1, l));
+     arma::vec v_v_hat = v_v / (1 - std::pow(beta2, l));
+     
+     u_l -= eta * m_u_hat / (arma::sqrt(v_u_hat) + epsilon);
+     v_l -= eta * m_v_hat / (arma::sqrt(v_v_hat) + epsilon);
+   }
+   
+   arma::vec hat_u = u_l;
+   arma::vec hat_v = v_l;
+   
+   for (int m = 1; m <= max_iter; ++m) {
+     arma::vec diff_sq = arma::square(hat_u) - arma::square(hat_v) + arma::square(h_m) - arma::square(g_m);
+     
+     arma::vec grad_h = (-4 * n0 * r0 % h_m + 4 * n0 * (R0 * diff_sq) % h_m);
+     arma::vec grad_g = (4 * n0 * r0 % g_m - 4 * n0 * (R0 * diff_sq) % g_m);
+     
+     m_h = beta1 * m_h + (1 - beta1) * grad_h;
+     v_h = beta2 * v_h + (1 - beta2) * arma::square(grad_h);
+     m_g = beta1 * m_g + (1 - beta1) * grad_g;
+     v_g = beta2 * v_g + (1 - beta2) * arma::square(grad_g);
+     
+     arma::vec m_h_hat = m_h / (1 - std::pow(beta1, m));
+     arma::vec v_h_hat = v_h / (1 - std::pow(beta2, m));
+     arma::vec m_g_hat = m_g / (1 - std::pow(beta1, m));
+     arma::vec v_g_hat = v_g / (1 - std::pow(beta2, m));
+     
+     h_m -= eta * m_h_hat / (arma::sqrt(v_h_hat) + epsilon);
+     g_m -= eta * m_g_hat / (arma::sqrt(v_g_hat) + epsilon);
+   }
+   
+   arma::vec hat_h = h_m;
+   arma::vec hat_g = g_m;
+   arma::vec hat_beta = arma::square(hat_u) - arma::square(hat_v) + arma::square(hat_h) - arma::square(hat_g);
+   
+   return Rcpp::List::create(
+     Rcpp::Named("hat_u") = hat_u,
+     Rcpp::Named("hat_v") = hat_v,
+     Rcpp::Named("hat_h") = hat_h,
+     Rcpp::Named("hat_g") = hat_g,
+     Rcpp::Named("hat_beta") = hat_beta
+   );
+ }
+ 
+ 
  // Function to apply gradient descent transfer learning across all blocks
  // [[Rcpp::export]]
  Rcpp::List gradient_descent_transfer_learning_all_blocks(
@@ -125,7 +220,12 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      double alpha4,
      double eta_l,
      double eta_m,
-     int max_iter
+     int max_iter,
+     bool adaptive,
+     double eta,
+     double beta1,
+     double beta2,
+     double epsilon
  ) {
    int num_blocks = indx_block.size();
    Rcpp::List beta_results(num_blocks);
@@ -159,17 +259,44 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        Rk_list.push_back(Rk);
      }
      
+     // // Call gradient descent function with correct inputs
+     // Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+     //   n0, 
+     //   summ.col(0), // r0 is the first column
+     //   Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+     //   nk_list, 
+     //   rk_list, 
+     //   Rk_list,
+     //   alpha1, alpha2, alpha3, alpha4, 
+     //   eta_l, eta_m, max_iter
+     // );
+     
      // Call gradient descent function with correct inputs
-     Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-       n0, 
-       summ.col(0), // r0 is the first column
-       Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
-       nk_list, 
-       rk_list, 
-       Rk_list,
-       alpha1, alpha2, alpha3, alpha4, 
-       eta_l, eta_m, max_iter
-     );
+     Rcpp::List beta_block;
+     if (adaptive) {
+       beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
+         n0, 
+         summ.col(0), // r0 is the first column
+         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+         nk_list, 
+         rk_list, 
+         Rk_list,
+         alpha1, alpha2, alpha3, alpha4, 
+         eta, beta1, beta2, epsilon, max_iter
+       );
+     } else {
+       beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+         n0, 
+         summ.col(0), // r0 is the first column
+         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+         nk_list, 
+         rk_list, 
+         Rk_list,
+         alpha1, alpha2, alpha3, alpha4, 
+         eta_l, eta_m, max_iter
+       );
+     }
+     
      
      // Extract beta vector for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);

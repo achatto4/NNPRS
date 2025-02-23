@@ -104,9 +104,9 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids
-iters <- c(100, 1000, 10000)
-etas <- c(0.01, 0.001, 0.0001)  # Use same eta for all
-alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
+iters <- c(100)
+etas <- c(0.0001)  # Use same eta for all
+alphas <- c(0.1)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {
@@ -301,7 +301,12 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     alpha4 = alpha,
     eta_l = eta, #Use ADAM
     eta_m = eta,
-    max_iter = iter
+    max_iter = iter,
+    adaptive = TRUE,
+    eta = 0.001,
+    beta1 = 0.9,
+    beta2 = 0.999,
+    epsilon = 1e-8
   )  
     }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")

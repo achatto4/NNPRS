@@ -106,7 +106,7 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 # Define parameter grids
 iters <- c(100, 1000)
 etas <- c(0.0001)  # Use same eta for all
-alphas <- c(1, 0.1, 0.01)  # Use same alpha for all
+alphas <- c(1, 0.1, 0.01, 0.001, 0.0001, 0)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {

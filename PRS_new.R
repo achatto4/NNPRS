@@ -104,8 +104,8 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids
-iters <- c(10)
-etas <- c(0.0001)  # Use same eta for all
+iters <- c(10, 25, 50)
+etas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
 alphas <- c(1, 0.1, 0.01, 0.001, 0.0001, 0)  # Use same alpha for all
 
 for (iter in iters) {
@@ -302,7 +302,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = eta, #Use ADAM
     eta_m = eta,
     max_iter = iter,
-    adaptive = TRUE,
+    adaptive = FALSE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,

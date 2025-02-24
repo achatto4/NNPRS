@@ -2,7 +2,60 @@
 #include <cmath> // For std::isnan()
 using namespace Rcpp;
 
+// [[Rcpp::depends(RcppArmadillo)]]
 
+// Gradient descent function without auxiliary dataset
+//' Compute beta joint with only main dataset
+ //'
+ //' @param r0: summary statistics for main ancestry
+ //' @param n0: sample size for main ancestry 
+ //' @param R0: correlation matrix of all SNPs for main ancestry
+ //' @param alpha1-4: initialization parameters
+ //' @return beta vector
+ // [[Rcpp::export]]
+ Rcpp::List gradient_descent_main_only(
+     double n0,
+     arma::vec r0,
+     arma::mat R0,
+     double alpha1,
+     double alpha2,
+     double alpha3,
+     double alpha4,
+     double eta_m,
+     int max_iter
+ ) {
+   int p = R0.n_rows;
+   
+   // Initialize variables
+   arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+   arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+   
+   // Gradient descent for main data
+   for (int m = 0; m <= max_iter; ++m) {
+     arma::vec h_m_sq = arma::square(h_m);
+     arma::vec g_m_sq = arma::square(g_m);
+     arma::vec diff_sq = h_m_sq - g_m_sq;
+     
+     arma::vec grad_h = (-4 * n0 * r0 % h_m + 4 * n0 * (R0 * diff_sq) % h_m);
+     arma::vec grad_g = (4 * n0 * r0 % g_m - 4 * n0 * (R0 * diff_sq) % g_m);
+     
+     h_m -= (eta_m / n0) * grad_h;
+     g_m -= (eta_m / n0) * grad_g;
+   }
+   
+   arma::vec hat_h = h_m;
+   arma::vec hat_g = g_m;
+   
+   // Compute final beta estimate
+   arma::vec hat_beta = arma::square(hat_h) - arma::square(hat_g);
+   
+   return Rcpp::List::create(
+     Rcpp::Named("hat_h") = hat_h,
+     Rcpp::Named("hat_g") = hat_g,
+     Rcpp::Named("hat_beta") = hat_beta
+   );
+ }
+ 
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // Gradient descent function for transfer learning
@@ -259,21 +312,18 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        Rk_list.push_back(Rk);
      }
      
-     // // Call gradient descent function with correct inputs
-     // Rcpp::List beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-     //   n0, 
-     //   summ.col(0), // r0 is the first column
-     //   Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
-     //   nk_list, 
-     //   rk_list, 
-     //   Rk_list,
-     //   alpha1, alpha2, alpha3, alpha4, 
-     //   eta_l, eta_m, max_iter
-     // );
      
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;
-     if (adaptive) {
+     if (M == 1) {
+       beta_block = gradient_descent_main_only(
+         0, 
+         summ.col(0), // r0 is the first column
+         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+         alpha1, alpha2, alpha3, alpha4,
+         eta, max_iter
+       );
+     } else if (adaptive) {
        beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
          n0, 
          summ.col(0), // r0 is the first column

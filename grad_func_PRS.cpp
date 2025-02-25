@@ -258,7 +258,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
  
  
 // Function to apply gradient descent transfer learning across all blocks
- [[Rcpp::export]]
+// [[Rcpp::export]]
  Rcpp::List gradient_descent_transfer_learning_all_blocks(
      Rcpp::List summ_list,
      Rcpp::List LD_list,

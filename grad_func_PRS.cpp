@@ -259,6 +259,108 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
  
  // Function to apply gradient descent transfer learning across all blocks
  // [[Rcpp::export]]
+ // Rcpp::List gradient_descent_transfer_learning_all_blocks(
+ //     Rcpp::List summ_list,
+ //     Rcpp::List LD_list,
+ //     int M,
+ //     Rcpp::List indx,
+ //     Rcpp::IntegerVector indx_block,
+ //     double n0,
+ //     std::vector<double> nk_list,
+ //     double alpha1,
+ //     double alpha2,
+ //     double alpha3,
+ //     double alpha4,
+ //     double eta_l,
+ //     double eta_m,
+ //     int max_iter,
+ //     bool adaptive,
+ //     double eta,
+ //     double beta1,
+ //     double beta2,
+ //     double epsilon
+ // ) {
+ //   int num_blocks = indx_block.size();
+ //   Rcpp::List beta_results(num_blocks);
+ //   
+ //   for (int bl = 0; bl < num_blocks; ++bl) {
+ //     if (indx_block[bl] == 0) {
+ //       beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = R_NilValue);
+ //       continue;
+ //     }
+ //     
+ //     // Extract summary statistics and LD matrices
+ //     arma::mat summ = Rcpp::as<arma::mat>(summ_list[bl]);
+ //     replace_nan_with_zero(summ); // Ensure no NaNs
+ //     arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
+ //     
+ //     
+ //     Rcpp::List R = LD_list[bl];
+ //     // Prepare rk_list: all columns except the first from summ, only if M != 1
+ //     std::vector<arma::vec> rk_list;
+ //     if (M != 1) {
+ //       for (size_t i = 1; i < summ.n_cols; ++i) {
+ //         arma::vec col = summ.col(i);
+ //         col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
+ //         rk_list.push_back(col);
+ //       }
+ //     }
+ //     
+ //     // Prepare Rk_list: all LD matrices except the first (target population), only if M != 1
+ //     std::vector<arma::mat> Rk_list;
+ //     if (M != 1) {
+ //       for (size_t i = 1; i < R.size(); ++i) {
+ //         arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
+ //         replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
+ //         Rk_list.push_back(Rk);
+ //       }
+ //     }
+ //     
+ //     // Call gradient descent function with correct inputs
+ //     Rcpp::List beta_block;
+ //     if (adaptive) {
+ //       beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
+ //         n0, 
+ //         summ.col(0), // r0 is the first column
+ //         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+ //         nk_list, 
+ //         rk_list, 
+ //         Rk_list,
+ //         alpha1, alpha2, alpha3, alpha4, 
+ //         eta, beta1, beta2, epsilon, max_iter
+ //       );
+ //     } else {
+ //       beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+ //         n0, 
+ //         summ.col(0), // r0 is the first column
+ //         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+ //         nk_list, 
+ //         rk_list, 
+ //         Rk_list,
+ //         alpha1, alpha2, alpha3, alpha4, 
+ //         eta_l, eta_m, max_iter
+ //       );
+ //     }
+ //     
+ //     
+ //     // Extract beta vector for the target population
+ //     arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
+ //     arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
+ //     
+ //     // Element-wise multiplication to apply indexing
+ //     arma::vec beta_final = beta_vec % indx_binary;
+ //     
+ //     // Store the final beta vector in the results
+ //     beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_final);
+ //   }
+ //   
+ //   return beta_results;
+ // }
+ // 
+ 
+ 
+ // Function to apply gradient descent transfer learning across all blocks
+ // [[Rcpp::export]]
  Rcpp::List gradient_descent_transfer_learning_all_blocks(
      Rcpp::List summ_list,
      Rcpp::List LD_list,
@@ -294,37 +396,31 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      replace_nan_with_zero(summ); // Ensure no NaNs
      arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
      
-     
      Rcpp::List R = LD_list[bl];
-     // Prepare rk_list: all columns except the first from summ, only if M != 1
+     
+     // Prepare rk_list and Rk_list correctly, even when M == 1
      std::vector<arma::vec> rk_list;
-     if (M != 1) {
-       for (size_t i = 1; i < summ.n_cols; ++i) {
-         arma::vec col = summ.col(i);
-         col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
-         rk_list.push_back(col);
-       }
-     }
-     
-     // Prepare Rk_list: all LD matrices except the first (target population), only if M != 1
      std::vector<arma::mat> Rk_list;
-     if (M != 1) {
-       for (size_t i = 1; i < R.size(); ++i) {
-         arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
-         replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
-         Rk_list.push_back(Rk);
-       }
+     for (size_t i = 1; i < summ.n_cols; ++i) {
+       arma::vec col = summ.col(i);
+       col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
+       rk_list.push_back(col);
+     }
+     for (size_t i = 1; i < R.size(); ++i) {
+       arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
+       replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
+       Rk_list.push_back(Rk);
      }
      
-     // Call gradient descent function with correct inputs
+     // Call appropriate gradient descent function
      Rcpp::List beta_block;
-     if (M == 1) {
+     if (M == 1 || summ.n_cols == 1) {
        beta_block = gradient_descent_main_only(
-         0, 
+         n0, 
          summ.col(0), // r0 is the first column
          Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
          alpha1, alpha2, alpha3, alpha4,
-         eta, max_iter
+         eta_m, max_iter
        );
      } else if (adaptive) {
        beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
@@ -350,18 +446,18 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        );
      }
      
-     
      // Extract beta vector for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
      arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
      
-     // Element-wise multiplication to apply indexing
+     // Apply indexing
      arma::vec beta_final = beta_vec % indx_binary;
      
-     // Store the final beta vector in the results
+     // Store the result
      beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_final);
    }
    
    return beta_results;
  }
+ 
  

@@ -294,24 +294,27 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      replace_nan_with_zero(summ); // Ensure no NaNs
      arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
      
+     
      Rcpp::List R = LD_list[bl];
-     
-     // Prepare rk_list: all columns except the first from summ
+     // Prepare rk_list: all columns except the first from summ, only if M != 1
      std::vector<arma::vec> rk_list;
-     for (size_t i = 1; i < summ.n_cols; ++i) {
-       arma::vec col = summ.col(i);
-       col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
-       rk_list.push_back(col);
+     if (M != 1) {
+       for (size_t i = 1; i < summ.n_cols; ++i) {
+         arma::vec col = summ.col(i);
+         col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
+         rk_list.push_back(col);
+       }
      }
      
-     // Prepare Rk_list: all LD matrices except the first (target population)
+     // Prepare Rk_list: all LD matrices except the first (target population), only if M != 1
      std::vector<arma::mat> Rk_list;
-     for (size_t i = 1; i < R.size(); ++i) {
-       arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
-       replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
-       Rk_list.push_back(Rk);
+     if (M != 1) {
+       for (size_t i = 1; i < R.size(); ++i) {
+         arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
+         replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
+         Rk_list.push_back(Rk);
+       }
      }
-     
      
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;
@@ -345,6 +348,18 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          alpha1, alpha2, alpha3, alpha4, 
          eta_l, eta_m, max_iter
        );
+     }
+     
+     // Debug: Print beta_block contents
+     Rcpp::Rcout << "beta_block contents:" << std::endl;
+     Rcpp::Rcout << beta_block << std::endl;
+     
+     // Check if "hat_beta" exists in beta_block
+     if (beta_block.containsElementNamed("hat_beta")) {
+       arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
+       Rcpp::Rcout << "hat_beta values: " << beta_vec.t() << std::endl;
+     } else {
+       Rcpp::Rcout << "Error: beta_block does not contain 'hat_beta'" << std::endl;
      }
      
      

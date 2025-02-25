@@ -350,18 +350,6 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        );
      }
      
-     // Debug: Print beta_block contents
-     Rcpp::Rcout << "beta_block contents:" << std::endl;
-     Rcpp::Rcout << beta_block << std::endl;
-     
-     // Check if "hat_beta" exists in beta_block
-     if (beta_block.containsElementNamed("hat_beta")) {
-       arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
-       Rcpp::Rcout << "hat_beta values: " << beta_vec.t() << std::endl;
-     } else {
-       Rcpp::Rcout << "Error: beta_block does not contain 'hat_beta'" << std::endl;
-     }
-     
      
      // Extract beta vector for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);

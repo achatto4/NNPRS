@@ -105,7 +105,7 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 
 # Define parameter grids (non-ADAM)
 iters <- c(10, 100)
-@etas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+etas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
 alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
 
 # Define parameter grids (non-ADAM)

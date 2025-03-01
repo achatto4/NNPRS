@@ -307,7 +307,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = eta, #Use ADAM
     eta_m = eta,
     max_iter = iter,
-    adaptive = TRUE,
+    adaptive = FALSE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,

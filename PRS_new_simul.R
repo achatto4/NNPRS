@@ -77,7 +77,7 @@ generate_synthetic_data <- function(n, p, beta) {
 }
 
 # Parameters
-p <- 1000  # Number of SNPs
+p <- 5000  # Number of SNPs
 n_EUR <- 10000  # Sample size for EUR
 n_SAS <- 2000  # Sample size for SAS
 n_EAS <- 2000  # Sample size for EAS
@@ -95,7 +95,7 @@ set.seed(123)
 nonzero_indices <- sample(1:p, num_nonzero)
 
 # Assign random values to non-zero indices
-beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.5)
+beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.001)
 
 # Generate synthetic data for auxiliary populations
 data_EUR <- generate_synthetic_data(n_EUR, p, beta1)
@@ -107,7 +107,7 @@ data_AFR <- generate_synthetic_data(n_AFR, p, beta1)
 
 # Introduce jitter to beta for AFR population
 set.seed(1)
-beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.01)
+beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.0001)
 
 data_AFR_jittered <- generate_synthetic_data(n_AFR, p, beta_AFR)
 
@@ -129,7 +129,7 @@ alpha3 <- 0.01
 alpha4 <- 0.01
 eta_l <- 0.01
 eta_m <- 0.01
-max_iter <- 10000
+max_iter <- 100
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")

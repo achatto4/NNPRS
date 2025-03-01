@@ -359,7 +359,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      arma::vec beta_final = beta_vec % indx_binary;
 
      // Store the final beta vector in the results
-     beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_final);
+     beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_vec);
    }
 
    return beta_results;

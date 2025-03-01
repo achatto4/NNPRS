@@ -385,6 +385,11 @@ registerDoMC(1)
 tmp <- score[,4] != 0; m <- !(tmp==0)
 score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
+
+# Select the top 10% highest absolute scores
+threshold <- quantile(abs(score[,4]), 0.9)  # Compute the 90th percentile
+score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
+
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
 
 if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))

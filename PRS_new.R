@@ -104,14 +104,14 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
-# iters <- c(10, 100)
-# etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
-# alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
+iters <- c(10, 100)
+etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
 
 # Define parameter grids (non-ADAM)
-iters <- c(1000)
-etas <- c(0.01)  # Use same eta for all
-alphas <- c(0.01)  # Use same alpha for all
+# iters <- c(1000)
+# etas <- c(0.01)  # Use same eta for all
+# alphas <- c(0.01)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {
@@ -387,7 +387,7 @@ score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 
 # Select the top 10% highest absolute scores
-threshold <- quantile(abs(score[,4]), 0.99)  # Compute the 90th percentile
+threshold <- quantile(abs(score[,4]), 0.9)  # Compute the 90th percentile
 score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
 
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)

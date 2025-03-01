@@ -110,8 +110,8 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 
 # Define parameter grids (non-ADAM)
 iters <- c(100)
-etas <- c(10^-2)  # Use same eta for all
-alphas <- c(10^-5)  # Use same alpha for all
+etas <- c(1)  # Use same eta for all
+alphas <- c(1)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {

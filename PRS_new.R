@@ -104,14 +104,14 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
-iters <- c(10, 100)
-etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
-alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
+# iters <- c(10, 100)
+# etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+# alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
 
 # Define parameter grids (non-ADAM)
-# iters <- c(1:10)
-# etas <- c(0.0001)  # Use same eta for all
-# alphas <- c(0)  # Use same alpha for all
+iters <- c(25)
+etas <- c(1/log(25))  # Use same eta for all
+alphas <- c(10^-5)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {

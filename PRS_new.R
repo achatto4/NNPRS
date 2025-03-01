@@ -109,7 +109,7 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 # alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
 
 # Define parameter grids (non-ADAM)
-iters <- c(100)
+iters <- c(1)
 etas <- c(1)  # Use same eta for all
 alphas <- c(1)  # Use same alpha for all
 

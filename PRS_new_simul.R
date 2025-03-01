@@ -131,7 +131,7 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 5000
+max_iter <- 100
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")

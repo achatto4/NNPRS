@@ -77,7 +77,7 @@ generate_synthetic_data <- function(n, p, beta) {
 }
 
 # Parameters
-p <- 5000  # Number of SNPs
+p <- 500  # Number of SNPs
 n_EUR <- 10000  # Sample size for EUR
 n_SAS <- 2000  # Sample size for SAS
 n_EAS <- 2000  # Sample size for EAS
@@ -95,7 +95,7 @@ set.seed(123)
 nonzero_indices <- sample(1:p, num_nonzero)
 
 # Assign random values to non-zero indices
-beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.001)
+beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.1)
 
 # Generate synthetic data for auxiliary populations
 data_EUR <- generate_synthetic_data(n_EUR, p, beta1)
@@ -107,7 +107,7 @@ data_AFR <- generate_synthetic_data(n_AFR, p, beta1)
 
 # Introduce jitter to beta for AFR population
 set.seed(1)
-beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.0001)
+beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.00001)
 
 data_AFR_jittered <- generate_synthetic_data(n_AFR, p, beta_AFR)
 
@@ -122,23 +122,25 @@ R_list <- list(data_EUR$R, data_SAS$R, data_EAS$R)
 r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
+alpha = 0.01
+eta = 0.01
 # Algorithm parameters
-alpha1 <- 0.01
-alpha2 <- 0.01
-alpha3 <- 0.01
-alpha4 <- 0.01
-eta_l <- 0.01
-eta_m <- 0.01
-max_iter <- 100
+alpha1 <-alpha
+alpha2 <-alpha
+alpha3 <-alpha
+alpha4 <-alpha
+eta_l <-eta
+eta_m <-eta
+max_iter <- 5000
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")
 
 # Run gradient descent algorithm
-res_rcpp <- gradient_descent_transfer_learning_rcpp(
-  n_AFR, r_AFR, R_AFR, n_list, r_list, R_list, 
-  alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
-)
+# res_rcpp <- gradient_descent_transfer_learning_rcpp(
+#   n_AFR, r_AFR, R_AFR, n_list, r_list, R_list, 
+#   alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
+# )
 
 res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
   n_AFR, r_AFR_jittered, R_AFR_jittered, n_list, r_list, R_list, 
@@ -146,8 +148,11 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
 )
 
 # Compute PRS
-PRS_original <- data_AFR$X %*% res_rcpp$hat_beta
+PRS_original <- data_AFR$X %*% beta1
 PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
+
+kendall_tau <- cor(PRS_original, PRS_jittered, method = "kendall")
+print(kendall_tau)
 
 # Plot PRS distributions
 ggplot() +
@@ -157,4 +162,5 @@ ggplot() +
   xlab("PRS Score") +
   theme_minimal()
 
-
+beta1[nonzero_indices]
+res_rcpp_jittered$hat_beta[nonzero_indices]

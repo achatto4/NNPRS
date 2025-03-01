@@ -109,9 +109,9 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 # alphas <- c(0.1, 0.01, 0.001, 0)  # Use same alpha for all
 
 # Define parameter grids (non-ADAM)
-iters <- c(5000)
-etas <- c(0.01)  # Use same eta for all
-alphas <- c(0.01)  # Use same alpha for all
+iters <- c(1000)
+etas <- c(1, 0.1, 0.001)  # Use same eta for all
+alphas <- c(0.1, 0.01, 0.001)  # Use same alpha for all
 
 for (iter in iters) {
   for (eta in etas) {

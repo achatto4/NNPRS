@@ -106,12 +106,12 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 # Define parameter grids (non-ADAM)
 q_thresh = 0
 iters <- c(10, 100, 1000)
-etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
+#etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 alphas <- c(0.001, 0.01, 0.1)  # Use same alpha for all
 
 # Define parameter grids 
 # iters <- c(1000)
-# etas <- c(0.01)  # Use same eta for all
+ etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
 for (iter in iters) {

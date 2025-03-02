@@ -315,7 +315,6 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        }
      }
      double inv_num_rows = 1.0 / indx_mat.n_rows;
-     Rcpp::Rcout << "inv_num_rows: " << inv_num_rows << std::endl;
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;
      if (M == 1 || summ.n_cols == 1) {
@@ -373,44 +372,6 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        }
      }
      
-     // Rcpp::List beta_block;
-     // if (M == 1 || summ.n_cols == 1) {
-     //   
-     //     beta_block = gradient_descent_main_only(
-     //       n0,
-     //       summ.col(0),
-     //       Rcpp::as<arma::mat>(R[0]),
-     //       alpha1, alpha2,
-     //       eta_m, max_iter
-     //     );
-     //   
-     // } else if (adaptive) {
-     //   beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
-     //     n0,
-     //     summ.col(0),
-     //     Rcpp::as<arma::mat>(R[0]),
-     //     nk_list,
-     //     rk_list,
-     //     Rk_list,
-     //     alpha1, alpha2, alpha3, alpha4,
-     //     eta, beta1, beta2, epsilon, max_iter
-     //   );
-     // } else {
-     //   
-     //     beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-     //       n0,
-     //       summ.col(0),
-     //       Rcpp::as<arma::mat>(R[0]),
-     //       nk_list,
-     //       rk_list,
-     //       Rk_list,
-     //       alpha1, alpha2, alpha3, alpha4,
-     //       eta_l, eta_m, max_iter
-     //     );
-     //   
-     // }
-
-
      // Extract beta vector for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
      arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);

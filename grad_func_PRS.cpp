@@ -19,16 +19,14 @@ using namespace Rcpp;
      arma::mat R0,
      double alpha1,
      double alpha2,
-     double alpha3,
-     double alpha4,
      double eta_m,
      int max_iter
  ) {
    int p = R0.n_rows;
    
    // Initialize variables
-   arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
-   arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+   arma::vec h_m = alpha1 * arma::ones<arma::vec>(p);
+   arma::vec g_m = alpha2 * arma::ones<arma::vec>(p);
    
    // Gradient descent for main data
    for (int m = 0; m <= max_iter; ++m) {
@@ -326,7 +324,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),
-           inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
+           inv_num_rows, inv_num_rows,
            eta_m, max_iter
          );
        } else {
@@ -334,7 +332,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),
-           alpha1, alpha2, alpha3, alpha4,
+           alpha1, alpha2,
            eta_m, max_iter
          );
        }

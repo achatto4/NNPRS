@@ -106,6 +106,7 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 # Define parameter grids (non-ADAM)
 q_thresh = 0
 iters <- c(1, 10, 100, 1000)
+eta = 1/log(iter+1)
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 #alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all
 
@@ -292,7 +293,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
    
-  eta = 1/log(iter+1)
   alpha = 10^-3
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(

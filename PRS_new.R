@@ -104,7 +104,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
-q_thresh = 0.9
+# q_thresh = 0.9
 iters <- c(1, 10, 100, 1000)
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all
@@ -388,8 +388,8 @@ score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 
 # Select the top 10% highest absolute scores
-threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
-score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
+# threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
+# score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
 
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
 

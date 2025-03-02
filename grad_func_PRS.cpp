@@ -319,30 +319,29 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      double inv_num_rows = 1.0 / indx_mat.n_rows;
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;
-     if (alpha_adaptive) {
-       beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-         n0,
-         summ.col(0), // r0 is the first column
-         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
-         nk_list,
-         rk_list,
-         Rk_list,
-         inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
-         eta_l, eta_m, max_iter
-       );
-     } else if (M == 1 || summ.n_cols == 1) {
-       beta_block = gradient_descent_main_only(
-         n0,
-         summ.col(0), // r0 is the first column
-         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
-         alpha1, alpha2, alpha3, alpha4,
-         eta_m, max_iter
-       );
-    } else if (adaptive) {
+     if (M == 1 || summ.n_cols == 1) {
+       if (alpha_adaptive) {
+         beta_block = gradient_descent_main_only(
+           n0,
+           summ.col(0),
+           Rcpp::as<arma::mat>(R[0]),
+           inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
+           eta_m, max_iter
+         );
+       } else {
+         beta_block = gradient_descent_main_only(
+           n0,
+           summ.col(0),
+           Rcpp::as<arma::mat>(R[0]),
+           alpha1, alpha2, alpha3, alpha4,
+           eta_m, max_iter
+         );
+       }
+     } else if (adaptive) {
        beta_block = gradient_descent_transfer_learning_rcpp_ADAM(
          n0,
-         summ.col(0), // r0 is the first column
-         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+         summ.col(0),
+         Rcpp::as<arma::mat>(R[0]),
          nk_list,
          rk_list,
          Rk_list,
@@ -350,16 +349,29 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          eta, beta1, beta2, epsilon, max_iter
        );
      } else {
-       beta_block = gradient_descent_transfer_learning_rcpp_PRS(
-         n0,
-         summ.col(0), // r0 is the first column
-         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
-         nk_list,
-         rk_list,
-         Rk_list,
-         alpha1, alpha2, alpha3, alpha4,
-         eta_l, eta_m, max_iter
-       );
+       if (alpha_adaptive) {
+         beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+           n0,
+           summ.col(0),
+           Rcpp::as<arma::mat>(R[0]),
+           nk_list,
+           rk_list,
+           Rk_list,
+           inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
+           eta_l, eta_m, max_iter
+         );
+       } else {
+         beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+           n0,
+           summ.col(0),
+           Rcpp::as<arma::mat>(R[0]),
+           nk_list,
+           rk_list,
+           Rk_list,
+           alpha1, alpha2, alpha3, alpha4,
+           eta_l, eta_m, max_iter
+         );
+       }
      }
 
 

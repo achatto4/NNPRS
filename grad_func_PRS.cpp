@@ -314,7 +314,8 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          Rk_list.push_back(Rk);
        }
      }
-     double inv_num_rows = 1.0 / indx_mat.n_rows;
+     // double inv_num_rows = 1.0 / indx_mat.n_rows;
+     double inv_num_rows = 1.0;
      Rcpp::Rcout << "inv_num_rows: " << inv_num_rows << std::endl;
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;

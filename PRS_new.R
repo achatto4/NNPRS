@@ -292,7 +292,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
    
-  eta_input = 1/log(iter+1)
+  eta = 1/log(iter+1)
   alpha = 10^-3
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
@@ -307,8 +307,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     alpha2 = alpha,
     alpha3 = alpha,
     alpha4 = alpha,
-    eta_l = eta_input, 
-    eta_m = eta_input,
+    eta_l = eta, 
+    eta_m = eta,
     max_iter = iter,
     adaptive = FALSE,
     alpha_adaptive = TRUE,
@@ -469,7 +469,7 @@ if(opt$testing){
   # print(R2)
   
   # Store results
-  results <- rbind(results, data.frame(iter = iter, eta = eta_input, alpha = alpha, R2 = R2))
+  results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }

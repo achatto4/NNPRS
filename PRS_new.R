@@ -107,15 +107,15 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 q_thresh = 0
 iters <- c(1, 10, 100, 1000)
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
-alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all
+#alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all
 
 # Define parameter grids 
 # iters <- c(1000)
- etas <- c(0.01)  # Use same eta for all
+#etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
-for (iter in iters) {
-  for (eta in etas) {
+# for (iter in iters) {
+#   for (eta in etas) {
     for (alpha in alphas) {
 
 ############
@@ -291,7 +291,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-        
+       
+  eta = 1/log(iter+1)
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,
@@ -308,7 +309,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = eta, #Use ADAM
     eta_m = eta,
     max_iter = iter,
-    adaptive = TRUE,
+    adaptive = FALSE,
+    alpha_adaptive = TRUE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,
@@ -470,8 +472,8 @@ if(opt$testing){
   print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
-    }
-  }
+  #   }
+  # }
 }
 write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))

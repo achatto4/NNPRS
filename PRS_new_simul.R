@@ -84,7 +84,7 @@ n_EAS <- 200  # Sample size for EAS
 n_AFR <- 100  # Sample size for AFR (main population)
 
 # Set parameters
-percentage_nonzero <- 2*10^-4  # 1% non-zero SNPs
+percentage_nonzero <- 0.001  # 1% non-zero SNPs
 num_nonzero <- ceiling(p * percentage_nonzero)
 
 # Initialize beta with zeros
@@ -131,7 +131,7 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 10000
+max_iter <- 1000
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")
@@ -155,7 +155,7 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
 
 #Compute PRS
 #Compute the 99th percentile threshold of absolute values
-threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0.9)
+threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0)
 #threshold <- quantile(abs(res$hat_beta), 0.99)
 # Set values below the threshold to 0
 res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0

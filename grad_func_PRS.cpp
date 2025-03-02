@@ -275,6 +275,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      double eta_m,
      int max_iter,
      bool adaptive,
+     bool alpha_adaptive,
      double eta,
      double beta1,
      double beta2,
@@ -315,10 +316,21 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          Rk_list.push_back(Rk);
        }
      }
-
+     double inv_num_rows = 1.0 / indx_mat.n_rows;
      // Call gradient descent function with correct inputs
      Rcpp::List beta_block;
-     if (M == 1 || summ.n_cols == 1) {
+     if (alpha_adaptive) {
+       beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+         n0,
+         summ.col(0), // r0 is the first column
+         Rcpp::as<arma::mat>(R[0]), // R0 is the first LD matrix
+         nk_list,
+         rk_list,
+         Rk_list,
+         inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
+         eta_l, eta_m, max_iter
+       );
+     } else if (M == 1 || summ.n_cols == 1) {
        beta_block = gradient_descent_main_only(
          n0,
          summ.col(0), // r0 is the first column

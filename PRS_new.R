@@ -114,9 +114,9 @@ iters <- c(1, 10, 100, 1000)
 #etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
-# for (iter in iters) {
+for (iter in iters) {
 #   for (eta in etas) {
-    for (alpha in alphas) {
+# for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data

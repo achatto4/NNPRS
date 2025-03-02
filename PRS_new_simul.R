@@ -84,7 +84,7 @@ n_EAS <- 200  # Sample size for EAS
 n_AFR <- 100  # Sample size for AFR (main population)
 
 # Set parameters
-percentage_nonzero <- 0.01  # 1% non-zero SNPs
+percentage_nonzero <- 0.0001  # 1% non-zero SNPs
 num_nonzero <- ceiling(p * percentage_nonzero)
 
 # Initialize beta with zeros
@@ -122,8 +122,8 @@ R_list <- list(data_EUR$R, data_SAS$R, data_EAS$R)
 r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
-alpha = 0.1
-eta = 0.1
+alpha = 0.01
+eta = 0.01
 # Algorithm parameters
 alpha1 <-alpha
 alpha2 <-alpha
@@ -131,7 +131,7 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 1000
+max_iter <- 10000
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")

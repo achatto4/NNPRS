@@ -105,7 +105,7 @@ results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 =
 
 # Define parameter grids (non-ADAM)
 q_thresh = 0
-iters <- c(100, 1000, 10)
+iters <- c(10, 100, 1000)
 etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 alphas <- c(0.001, 0.01, 0.1)  # Use same alpha for all
 
@@ -308,7 +308,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = eta, #Use ADAM
     eta_m = eta,
     max_iter = iter,
-    adaptive = FALSE,
+    adaptive = TRUE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,

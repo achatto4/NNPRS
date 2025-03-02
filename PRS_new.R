@@ -291,8 +291,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-       
-  eta_input = 1/iter+1
+  eta_input = 0.01   
+  #eta_input = 1/iter+1
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,
@@ -306,7 +306,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     alpha2 = alpha,
     alpha3 = alpha,
     alpha4 = alpha,
-    eta_l = eta_input, #Use ADAM
+    eta_l = eta_input, 
     eta_m = eta_input,
     max_iter = iter,
     adaptive = FALSE,

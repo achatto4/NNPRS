@@ -104,7 +104,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
-q_thresh = 0.9
+q_thresh = 0.99
 iters <- c(1, 10, 100, 1000)
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all

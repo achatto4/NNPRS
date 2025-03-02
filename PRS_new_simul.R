@@ -155,10 +155,10 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
 
 #Compute PRS
 #Compute the 99th percentile threshold of absolute values
-#threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0.99)
-# threshold <- quantile(abs(res$hat_beta), 0.99)
+threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0.9)
+#threshold <- quantile(abs(res$hat_beta), 0.99)
 # Set values below the threshold to 0
-#res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
+res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
 # res$hat_beta[abs(res$hat_beta) < threshold] <- 0
 
 PRS_original <- data_AFR_jittered$X %*% beta1

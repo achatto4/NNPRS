@@ -73,7 +73,7 @@ generate_synthetic_data <- function(n, p, beta) {
   R <- crossprod(X) / n
   y <- X %*% beta
   r <- crossprod(X, y) / n
-  return(list(X = X, R = R, r = r))
+  return(list(X = X, R = R, r = r, y = y))
 }
 
 # Parameters
@@ -84,7 +84,7 @@ n_EAS <- 200  # Sample size for EAS
 n_AFR <- 100  # Sample size for AFR (main population)
 
 # Set parameters
-percentage_nonzero <- 0.0001  # 1% non-zero SNPs
+percentage_nonzero <- 2*10^-4  # 1% non-zero SNPs
 num_nonzero <- ceiling(p * percentage_nonzero)
 
 # Initialize beta with zeros
@@ -155,18 +155,30 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
 
 #Compute PRS
 #Compute the 99th percentile threshold of absolute values
-threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0.9)
+threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0)
 #threshold <- quantile(abs(res$hat_beta), 0.99)
 # Set values below the threshold to 0
 res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
 # res$hat_beta[abs(res$hat_beta) < threshold] <- 0
 
-PRS_original <- data_AFR_jittered$X %*% beta1
+PRS_original <- data_AFR_jittered$X %*% beta_AFR
 #PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
 PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
 rank(PRS_original); rank(PRS_jittered)
 kendall_tau <- cor(PRS_original, PRS_jittered, method = "kendall")
 print(kendall_tau)
+
+# Fit linear models
+model_original <- lm(data_AFR_jittered$y ~ PRS_original)
+model_jittered <- lm(data_AFR_jittered$y ~ PRS_jittered)
+
+# Compute R^2 values
+r2_original <- summary(model_original)$r.squared
+r2_jittered <- summary(model_jittered)$r.squared
+
+# Print results
+cat("R^2 for y ~ PRS_original:", r2_original, "\n")
+cat("R^2 for y ~ PRS_jittered:", r2_jittered, "\n")
 
 # Plot PRS distributions
 ggplot() +

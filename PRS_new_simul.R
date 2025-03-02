@@ -77,10 +77,10 @@ generate_synthetic_data <- function(n, p, beta) {
 }
 
 # Parameters
-p <- 500  # Number of SNPs
-n_EUR <- 10000  # Sample size for EUR
-n_SAS <- 2000  # Sample size for SAS
-n_EAS <- 2000  # Sample size for EAS
+p <- 1000  # Number of SNPs
+n_EUR <- 1000  # Sample size for EUR
+n_SAS <- 200  # Sample size for SAS
+n_EAS <- 200  # Sample size for EAS
 n_AFR <- 100  # Sample size for AFR (main population)
 
 # Set parameters
@@ -107,7 +107,7 @@ data_AFR <- generate_synthetic_data(n_AFR, p, beta1)
 
 # Introduce jitter to beta for AFR population
 set.seed(1)
-beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.00001)
+beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.001)
 
 data_AFR_jittered <- generate_synthetic_data(n_AFR, p, beta_AFR)
 
@@ -122,7 +122,7 @@ R_list <- list(data_EUR$R, data_SAS$R, data_EAS$R)
 r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
-alpha = 0.01
+alpha = 0.1
 eta = 0.1
 # Algorithm parameters
 alpha1 <-alpha
@@ -131,26 +131,40 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 100
+max_iter <- 1000
 
 # Load Rcpp function
 sourceCpp("grad_func.cpp")
 
 # Run gradient descent algorithm
+
+# res<- gradient_descent_transfer_learning(
+#     n_AFR, r_AFR, R_AFR, n_list, r_list, R_list,
+#     alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
+#   )
+
 # res_rcpp <- gradient_descent_transfer_learning_rcpp(
-#   n_AFR, r_AFR, R_AFR, n_list, r_list, R_list, 
+#   n_AFR, r_AFR, R_AFR, n_list, r_list, R_list,
 #   alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
 # )
 
 res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
-  n_AFR, r_AFR_jittered, R_AFR_jittered, n_list, r_list, R_list, 
+  n_AFR, r_AFR_jittered, R_AFR_jittered, n_list, r_list, R_list,
   alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
 )
 
-# Compute PRS
-PRS_original <- data_AFR$X %*% beta1
-PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
+#Compute PRS
+#Compute the 99th percentile threshold of absolute values
+#threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0.99)
+# threshold <- quantile(abs(res$hat_beta), 0.99)
+# Set values below the threshold to 0
+#res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
+# res$hat_beta[abs(res$hat_beta) < threshold] <- 0
 
+PRS_original <- data_AFR_jittered$X %*% beta1
+#PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
+PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
+rank(PRS_original); rank(PRS_jittered)
 kendall_tau <- cor(PRS_original, PRS_jittered, method = "kendall")
 print(kendall_tau)
 

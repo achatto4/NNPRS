@@ -101,7 +101,7 @@ sourceCpp("/dcs04/nilanjan/data/Anagh/PRS_proj/code_github/Promit_projects/grad_
 if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 
 # Initialize a data frame to store R^2 values
-results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
+#results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
 q_thresh = 0
@@ -469,8 +469,8 @@ if(opt$testing){
   # print(R2)
   
   # Store results
-  results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  print(paste("Iteration:", iter,  R²:", R2, "-> Appending results to the dataframe!"))
+  #results <- rbind(results, data.frame(iter = iter, R2 = R2))
+  print(paste("Iteration:", iter | R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt

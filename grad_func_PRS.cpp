@@ -60,15 +60,14 @@ using namespace Rcpp;
  // [[Rcpp::export]]
  Rcpp::List gradient_descent_main_P4(
      double n0,
-     arma::vec r0,  // r0 is now a vector
+     arma::vec r0,
      arma::mat R0,
      double alpha3,
      double alpha4,
      double eta_m,
      int max_iter
  ) {
-   
-   int p = R0.n_rows;  // Assuming square matrices, p is the number of SNPs (rows in R0)
+   int p = R0.n_rows; // Number of SNPs
    
    // Initialize variables
    arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
@@ -76,15 +75,15 @@ using namespace Rcpp;
    
    // Gradient descent for main data
    for (int m = 0; m <= max_iter; ++m) {
-     arma::vec h_m_fourth = arma::pow(h_m, 4);
-     arma::vec g_m_fourth = arma::pow(g_m, 4);
+     arma::vec h_m_4th = arma::pow(h_m, 4);
+     arma::vec g_m_4th = arma::pow(g_m, 4);
      arma::vec grad_h = arma::zeros<arma::vec>(p);
      arma::vec grad_g = arma::zeros<arma::vec>(p);
      
-     arma::vec diff_fourth = h_m_fourth - g_m_fourth;
+     arma::vec diff_4th = h_m_4th - g_m_4th;
      
-     grad_h = (-4 * n0 * r0 % h_m + 4 * n0 * (R0 * diff_fourth) % h_m);
-     grad_g = (4 * n0 * r0 % g_m - 4 * n0 * (R0 * diff_fourth) % g_m);
+     grad_h = (-8 * n0 * r0 % arma::pow(h_m, 3) + 8 * n0 * (R0 * diff_4th) % arma::pow(h_m, 3));
+     grad_g = (8 * n0 * r0 % arma::pow(g_m, 3) - 8 * n0 * (R0 * diff_4th) % arma::pow(g_m, 3));
      
      h_m -= (eta_m / n0) * grad_h;
      g_m -= (eta_m / n0) * grad_g;
@@ -93,7 +92,7 @@ using namespace Rcpp;
    arma::vec hat_h = h_m;
    arma::vec hat_g = g_m;
    
-   // Define the output
+   // Compute the final beta estimate with 4th power terms
    arma::vec hat_beta = arma::pow(hat_h, 4) - arma::pow(hat_g, 4);
    
    return Rcpp::List::create(

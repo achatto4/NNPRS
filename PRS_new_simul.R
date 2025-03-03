@@ -77,7 +77,7 @@ generate_synthetic_data <- function(n, p, beta) {
 }
 
 # Parameters
-p <- 1000  # Number of SNPs
+p <- 5000  # Number of SNPs
 n_EUR <- 1000  # Sample size for EUR
 n_SAS <- 200  # Sample size for SAS
 n_EAS <- 200  # Sample size for EAS
@@ -107,7 +107,7 @@ data_AFR <- generate_synthetic_data(n_AFR, p, beta1)
 
 # Introduce jitter to beta for AFR population
 set.seed(1)
-beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.001)
+beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.01)
 
 data_AFR_jittered <- generate_synthetic_data(n_AFR, p, beta_AFR)
 
@@ -122,8 +122,8 @@ R_list <- list(data_EUR$R, data_SAS$R, data_EAS$R)
 r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
-alpha = 0.01
-eta = 0.01
+alpha = 0.1
+eta = 0.1
 # Algorithm parameters
 alpha1 <-alpha
 alpha2 <-alpha
@@ -153,6 +153,11 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
   alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
 )
 
+res_rcpp_P4 <- gradient_descent_main_P4(
+  n_AFR, r_AFR_jittered, R_AFR_jittered,
+  alpha1, alpha2, eta_m, max_iter
+)
+
 res_rcpp_single <- gradient_descent_main_only(
   n_AFR, r_AFR_jittered, R_AFR_jittered,
   alpha1, alpha2, eta_m, max_iter
@@ -160,32 +165,36 @@ res_rcpp_single <- gradient_descent_main_only(
 
 #Compute PRS
 #Compute the 99th percentile threshold of absolute values
-threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0)
+#threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0)
 #threshold <- quantile(abs(res$hat_beta), 0.99)
 # Set values below the threshold to 0
-res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
+#res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
 # res$hat_beta[abs(res$hat_beta) < threshold] <- 0
 
 PRS_original <- data_AFR_jittered$X %*% beta_AFR
 #PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
 PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
 PRS_single <- data_AFR_jittered$X %*% res_rcpp_single$hat_beta
-rank(PRS_original); rank(PRS_jittered); rank(PRS_single)
-kendall_tau <- cor(PRS_original, PRS_jittered, method = "kendall")
+PRS_sinP4 <- data_AFR_jittered$X %*% res_rcpp_P4$hat_beta
+rank(PRS_original); rank(PRS_jittered); rank(PRS_single); rank(PRS_sinP4)
+kendall_tau <- cor(PRS_original, PRS_sinP4, method = "kendall")
 print(kendall_tau)
 
 # Fit linear models
 model_original <- lm(data_AFR_jittered$y ~ PRS_original)
 model_jittered <- lm(data_AFR_jittered$y ~ PRS_jittered)
 model_single <- lm(data_AFR_jittered$y ~ PRS_single)
+model_sinP4 <- lm(data_AFR_jittered$y ~ PRS_sinP4)
 # Compute R^2 values
 r2_original <- summary(model_original)$r.squared
 r2_jittered <- summary(model_jittered)$r.squared
 r2_single <- summary(model_single)$r.squared
+r2_sinP4 <- summary(model_sinP4)$r.squared
 # Print results
 cat("R^2 for y ~ PRS_original:", r2_original, "\n")
 cat("R^2 for y ~ PRS_jittered:", r2_jittered, "\n")
 cat("R^2 for y ~ PRS_single:", r2_single, "\n")
+cat("R^2 for y ~ PRS_sinP4:", r2_sinP4, "\n")
 # Plot PRS distributions
 ggplot() +
   geom_density(aes(PRS_original), fill = "red", alpha = 0.5) +
@@ -201,6 +210,14 @@ ggplot() +
   xlab("PRS Score") +
   theme_minimal()
 
-beta1[nonzero_indices]
+ggplot() +
+  geom_density(aes(PRS_original), fill = "red", alpha = 0.5) +
+  geom_density(aes(PRS_sinP4), fill = "blue", alpha = 0.5) +
+  ggtitle("PRS Distribution: Original vs sinP4") +
+  xlab("PRS Score") +
+  theme_minimal()
+
+beta_AFR[nonzero_indices]
 res_rcpp_jittered$hat_beta[nonzero_indices]
 res_rcpp_single$hat_beta[nonzero_indices]
+res_rcpp_P4$hat_beta[nonzero_indices]

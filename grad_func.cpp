@@ -131,3 +131,52 @@ Rcpp::List gradient_descent_main_only(
     Rcpp::Named("hat_beta") = hat_beta
   );
 }
+
+
+// [[Rcpp::depends(RcppArmadillo)]]
+
+// Gradient descent function for transfer learning (Main Data Only)
+// [[Rcpp::export]]
+Rcpp::List gradient_descent_main_P4(
+    double n0,
+    arma::vec r0,
+    arma::mat R0,
+    double alpha3,
+    double alpha4,
+    double eta_m,
+    int max_iter
+) {
+  int p = R0.n_rows; // Number of SNPs
+  
+  // Initialize variables
+  arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+  arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+  
+  // Gradient descent for main data
+  for (int m = 0; m <= max_iter; ++m) {
+    arma::vec h_m_4th = arma::pow(h_m, 4);
+    arma::vec g_m_4th = arma::pow(g_m, 4);
+    arma::vec grad_h = arma::zeros<arma::vec>(p);
+    arma::vec grad_g = arma::zeros<arma::vec>(p);
+    
+    arma::vec diff_4th = h_m_4th - g_m_4th;
+    
+    grad_h = (-8 * n0 * r0 % arma::pow(h_m, 3) + 8 * n0 * (R0 * diff_4th) % arma::pow(h_m, 3));
+    grad_g = (8 * n0 * r0 % arma::pow(g_m, 3) - 8 * n0 * (R0 * diff_4th) % arma::pow(g_m, 3));
+    
+    h_m -= (eta_m / n0) * grad_h;
+    g_m -= (eta_m / n0) * grad_g;
+  }
+  
+  arma::vec hat_h = h_m;
+  arma::vec hat_g = g_m;
+  
+  // Compute the final beta estimate with 4th power terms
+  arma::vec hat_beta = arma::pow(hat_h, 4) - arma::pow(hat_g, 4);
+  
+  return Rcpp::List::create(
+    Rcpp::Named("hat_h") = hat_h,
+    Rcpp::Named("hat_g") = hat_g,
+    Rcpp::Named("hat_beta") = hat_beta
+  );
+}

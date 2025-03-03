@@ -454,7 +454,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      Rcpp::List beta_block;
      if (M == 1 || summ.n_cols == 1) {
        if (alpha_adaptive) {
-         beta_block = gradient_descent_main_P4(
+         beta_block = gradient_descent_main_only(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),
@@ -462,7 +462,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
            eta_m, max_iter
          );
        } else {
-         beta_block = gradient_descent_main_only(
+         beta_block = gradient_descent_main_P4(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),

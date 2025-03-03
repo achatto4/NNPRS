@@ -477,7 +477,7 @@ if(opt$testing){
   #   }
   }
 }
-write.csv(results, "R2_results.csv", row.names = FALSE)
+#write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 
 # if(opt$cleanup){

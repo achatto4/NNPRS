@@ -87,3 +87,47 @@ Rcpp::List gradient_descent_transfer_learning_rcpp(
     Rcpp::Named("hat_beta") = hat_beta
   );
 }
+
+// Gradient descent function for PRS without auxiliary dataset
+// [[Rcpp::export]]
+Rcpp::List gradient_descent_main_only(
+    double n0,
+    arma::vec r0,  
+    arma::mat R0,
+    double alpha3,
+    double alpha4,
+    double eta_m,
+    int max_iter
+) {
+  
+  int p = R0.n_rows;  // Assuming square matrices, p is the number of SNPs (rows in R0)
+  
+  // Initialize variables
+  arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+  arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+  
+  // Gradient descent for main data
+  for (int m = 0; m <= max_iter; ++m) {
+    arma::vec h_m_sq = arma::square(h_m);
+    arma::vec g_m_sq = arma::square(g_m);
+    arma::vec diff_sq = h_m_sq - g_m_sq;
+    
+    arma::vec grad_h = (-4 * n0 * r0 % h_m + 4 * n0 * (R0 * diff_sq) % h_m);
+    arma::vec grad_g = (4 * n0 * r0 % g_m - 4 * n0 * (R0 * diff_sq) % g_m);
+    
+    h_m -= (eta_m / n0) * grad_h;
+    g_m -= (eta_m / n0) * grad_g;
+  }
+  
+  arma::vec hat_h = h_m;
+  arma::vec hat_g = g_m;
+  
+  // Compute the final beta estimate
+  arma::vec hat_beta = arma::square(hat_h) - arma::square(hat_g);
+  
+  return Rcpp::List::create(
+    Rcpp::Named("hat_h") = hat_h,
+    Rcpp::Named("hat_g") = hat_g,
+    Rcpp::Named("hat_beta") = hat_beta
+  );
+}

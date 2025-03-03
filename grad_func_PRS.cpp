@@ -54,6 +54,55 @@ using namespace Rcpp;
    );
  }
  
+ // [[Rcpp::depends(RcppArmadillo)]]
+ 
+ // Gradient descent function for transfer learning (Main Data Only)
+ // [[Rcpp::export]]
+ Rcpp::List gradient_descent_main_P4(
+     double n0,
+     arma::vec r0,  // r0 is now a vector
+     arma::mat R0,
+     double alpha3,
+     double alpha4,
+     double eta_m,
+     int max_iter
+ ) {
+   
+   int p = R0.n_rows;  // Assuming square matrices, p is the number of SNPs (rows in R0)
+   
+   // Initialize variables
+   arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+   arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+   
+   // Gradient descent for main data
+   for (int m = 0; m <= max_iter; ++m) {
+     arma::vec h_m_fourth = arma::pow(h_m, 4);
+     arma::vec g_m_fourth = arma::pow(g_m, 4);
+     arma::vec grad_h = arma::zeros<arma::vec>(p);
+     arma::vec grad_g = arma::zeros<arma::vec>(p);
+     
+     arma::vec diff_fourth = h_m_fourth - g_m_fourth;
+     
+     grad_h = (-4 * n0 * r0 % h_m + 4 * n0 * (R0 * diff_fourth) % h_m);
+     grad_g = (4 * n0 * r0 % g_m - 4 * n0 * (R0 * diff_fourth) % g_m);
+     
+     h_m -= (eta_m / n0) * grad_h;
+     g_m -= (eta_m / n0) * grad_g;
+   }
+   
+   arma::vec hat_h = h_m;
+   arma::vec hat_g = g_m;
+   
+   // Define the output
+   arma::vec hat_beta = arma::pow(hat_h, 4) - arma::pow(hat_g, 4);
+   
+   return Rcpp::List::create(
+     Rcpp::Named("hat_h") = hat_h,
+     Rcpp::Named("hat_g") = hat_g,
+     Rcpp::Named("hat_beta") = hat_beta
+   );
+ }
+ 
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // Gradient descent function for transfer learning
@@ -154,6 +203,93 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
     Rcpp::Named("hat_beta") = hat_beta
   );
 }
+ 
+ 
+ // [[Rcpp::depends(RcppArmadillo)]]
+ 
+ // Gradient descent function for transfer learning with 4th power
+ // [[Rcpp::export]]
+ Rcpp::List gradient_descent_transfer_learning_P4(
+     double n0,
+     arma::vec r0,
+     arma::mat R0,
+     std::vector<double> nk_list,
+     std::vector<arma::vec> rk_list,
+     std::vector<arma::mat> Rk_list,
+     double alpha1,
+     double alpha2,
+     double alpha3,
+     double alpha4,
+     double eta_l,
+     double eta_m,
+     int max_iter
+ ) {
+   int p = R0.n_rows;
+   
+   // Initialize variables
+   arma::vec u_l = alpha1 * arma::ones<arma::vec>(p);
+   arma::vec v_l = alpha2 * arma::ones<arma::vec>(p);
+   arma::vec h_m = alpha3 * arma::ones<arma::vec>(p);
+   arma::vec g_m = alpha4 * arma::ones<arma::vec>(p);
+   
+   // Gradient descent for auxiliary data
+   for (int l = 0; l <= max_iter; ++l) {
+     arma::vec grad_u = arma::zeros<arma::vec>(p);
+     arma::vec grad_v = arma::zeros<arma::vec>(p);
+     
+     for (size_t k = 0; k < nk_list.size(); ++k) {
+       double nk = nk_list[k];
+       arma::vec rk = rk_list[k];
+       arma::mat Rk = Rk_list[k];
+       
+       arma::vec u_l_4th = arma::pow(u_l, 4);
+       arma::vec v_l_4th = arma::pow(v_l, 4);
+       arma::vec diff_4th = u_l_4th - v_l_4th;
+       
+       grad_u += (-8 * nk * rk % arma::pow(u_l, 3) + 8 * nk * (Rk * diff_4th) % arma::pow(u_l, 3));
+       grad_v += (8 * nk * rk % arma::pow(v_l, 3) - 8 * nk * (Rk * diff_4th) % arma::pow(v_l, 3));
+     }
+     
+     double total_n = std::accumulate(nk_list.begin(), nk_list.end(), 0.0) + n0;
+     u_l -= (eta_l / total_n) * grad_u;
+     v_l -= (eta_l / total_n) * grad_v;
+   }
+   
+   arma::vec hat_u = u_l;
+   arma::vec hat_v = v_l;
+   
+   // Gradient descent for main data
+   for (int m = 0; m <= max_iter; ++m) {
+     arma::vec u_hat_4th = arma::pow(hat_u, 4);
+     arma::vec v_hat_4th = arma::pow(hat_v, 4);
+     arma::vec grad_h = arma::zeros<arma::vec>(p);
+     arma::vec grad_g = arma::zeros<arma::vec>(p);
+     
+     arma::vec h_m_4th = arma::pow(h_m, 4);
+     arma::vec g_m_4th = arma::pow(g_m, 4);
+     arma::vec diff_4th = u_hat_4th - v_hat_4th + h_m_4th - g_m_4th;
+     
+     grad_h = (-8 * n0 * r0 % arma::pow(h_m, 3) + 8 * n0 * (R0 * diff_4th) % arma::pow(h_m, 3));
+     grad_g = (8 * n0 * r0 % arma::pow(g_m, 3) - 8 * n0 * (R0 * diff_4th) % arma::pow(g_m, 3));
+     
+     h_m -= (eta_m / n0) * grad_h;
+     g_m -= (eta_m / n0) * grad_g;
+   }
+   
+   arma::vec hat_h = h_m;
+   arma::vec hat_g = g_m;
+   
+   // Compute the final beta estimate with 4th power terms
+   arma::vec hat_beta = arma::pow(hat_u, 4) - arma::pow(hat_v, 4) + arma::pow(hat_h, 4) - arma::pow(hat_g, 4);
+   
+   return Rcpp::List::create(
+     Rcpp::Named("hat_u") = hat_u,
+     Rcpp::Named("hat_v") = hat_v,
+     Rcpp::Named("hat_h") = hat_h,
+     Rcpp::Named("hat_g") = hat_g,
+     Rcpp::Named("hat_beta") = hat_beta
+   );
+ }
  
  // [[Rcpp::export]]
  void replace_nan_with_zero(arma::mat &mat) {
@@ -319,7 +455,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      Rcpp::List beta_block;
      if (M == 1 || summ.n_cols == 1) {
        if (alpha_adaptive) {
-         beta_block = gradient_descent_main_only(
+         beta_block = gradient_descent_main_P4(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),
@@ -348,7 +484,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        );
      } else {
        if (alpha_adaptive) {
-         beta_block = gradient_descent_transfer_learning_rcpp_PRS(
+         beta_block = gradient_descent_transfer_learning_P4(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),

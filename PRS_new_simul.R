@@ -153,6 +153,11 @@ res_rcpp_jittered <- gradient_descent_transfer_learning_rcpp(
   alpha1, alpha2, alpha3, alpha4, eta_l, eta_m, max_iter
 )
 
+res_rcpp_single <- gradient_descent_main_only(
+  n_AFR, r_AFR_jittered, R_AFR_jittered,
+  alpha1, alpha2, eta_m, max_iter
+)
+
 #Compute PRS
 #Compute the 99th percentile threshold of absolute values
 threshold <- quantile(abs(res_rcpp_jittered$hat_beta), 0)
@@ -164,22 +169,23 @@ res_rcpp_jittered$hat_beta[abs(res_rcpp_jittered$hat_beta) < threshold] <- 0
 PRS_original <- data_AFR_jittered$X %*% beta_AFR
 #PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
 PRS_jittered <- data_AFR_jittered$X %*% res_rcpp_jittered$hat_beta
-rank(PRS_original); rank(PRS_jittered)
+PRS_single <- data_AFR_jittered$X %*% res_rcpp_single$hat_beta
+rank(PRS_original); rank(PRS_jittered); rank(PRS_single)
 kendall_tau <- cor(PRS_original, PRS_jittered, method = "kendall")
 print(kendall_tau)
 
 # Fit linear models
 model_original <- lm(data_AFR_jittered$y ~ PRS_original)
 model_jittered <- lm(data_AFR_jittered$y ~ PRS_jittered)
-
+model_single <- lm(data_AFR_jittered$y ~ PRS_single)
 # Compute R^2 values
 r2_original <- summary(model_original)$r.squared
 r2_jittered <- summary(model_jittered)$r.squared
-
+r2_single <- summary(model_single)$r.squared
 # Print results
 cat("R^2 for y ~ PRS_original:", r2_original, "\n")
 cat("R^2 for y ~ PRS_jittered:", r2_jittered, "\n")
-
+cat("R^2 for y ~ PRS_single:", r2_single, "\n")
 # Plot PRS distributions
 ggplot() +
   geom_density(aes(PRS_original), fill = "red", alpha = 0.5) +
@@ -188,5 +194,13 @@ ggplot() +
   xlab("PRS Score") +
   theme_minimal()
 
+ggplot() +
+  geom_density(aes(PRS_original), fill = "red", alpha = 0.5) +
+  geom_density(aes(PRS_single), fill = "blue", alpha = 0.5) +
+  ggtitle("PRS Distribution: Original vs single") +
+  xlab("PRS Score") +
+  theme_minimal()
+
 beta1[nonzero_indices]
 res_rcpp_jittered$hat_beta[nonzero_indices]
+res_rcpp_single$hat_beta[nonzero_indices]

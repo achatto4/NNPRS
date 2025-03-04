@@ -292,8 +292,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-  # alpha = 10^-3
-  # eta = 1/iter
   alpha = 10^-3
   eta = 1/iter
   tryCatch({

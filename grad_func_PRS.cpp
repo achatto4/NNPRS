@@ -425,7 +425,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
 
      // Extract summary statistics and LD matrices
      arma::mat summ = Rcpp::as<arma::mat>(summ_list[bl]);
-     replace_nan_with_zero(summ); // Ensure no NaNs
+     // replace_nan_with_zero(summ); // Ensure no NaNs
      arma::mat indx_mat = Rcpp::as<arma::mat>(indx[bl]);
 
 
@@ -435,7 +435,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      if (M != 1) {
        for (size_t i = 1; i < summ.n_cols; ++i) {
          arma::vec col = summ.col(i);
-         col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
+         // col.elem(arma::find_nonfinite(col)).zeros(); // Replace NaNs in column
          rk_list.push_back(col);
        }
      }
@@ -445,7 +445,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      if (M != 1) {
        for (size_t i = 1; i < R.size(); ++i) {
          arma::mat Rk = Rcpp::as<arma::mat>(R[i]);
-         replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
+         // replace_nan_with_zero(Rk); // Ensure no NaNs in LD matrices
          Rk_list.push_back(Rk);
        }
      }
@@ -462,7 +462,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
            eta_m, max_iter
          );
        } else {
-         beta_block = gradient_descent_main_P4(
+         beta_block = gradient_descent_main_only(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),
@@ -483,7 +483,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        );
      } else {
        if (alpha_adaptive) {
-         beta_block = gradient_descent_transfer_learning_P4(
+         beta_block = gradient_descent_transfer_learning_rcpp_PRS(
            n0,
            summ.col(0),
            Rcpp::as<arma::mat>(R[0]),

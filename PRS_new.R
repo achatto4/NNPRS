@@ -109,16 +109,16 @@ exp_seq <- unique(round(exp(seq(log(1), log(10000), length.out = 20))))
 iters <- unique(c(1:10, exp_seq))
 
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
-#alphas <- c(1, 0.001, 0.01, 0.1)  # Use same alpha for all
+alphas <- 2^-c(1:10)  # Use same alpha for all
 
 # Define parameter grids 
 # iters <- c(1000)
 #etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
-for (iter in iters) {
+#for (iter in iters) {
 #for (eta in etas) {
-# for (alpha in alphas) {
+for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data
@@ -293,7 +293,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-  alpha = 10^-3
+  iter = 1
+  # alpha = 10^-3
   eta = 1/iter
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
@@ -471,7 +472,8 @@ if(opt$testing){
   
   # Store results
   #results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
+  #print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
+  print(paste("Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt

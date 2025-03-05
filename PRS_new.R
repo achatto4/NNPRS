@@ -118,7 +118,7 @@ alphas <- 2^-c(1:10)  # Use same alpha for all
 
 for (iter in iters) {
 #for (eta in etas) {
-for (alpha in alphas) {
+#for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data
@@ -294,7 +294,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   #iter = 1
-  # alpha = 10^-3
+  alpha = 10^-3
   eta = 1/iter
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
@@ -312,8 +312,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_l = eta, 
     eta_m = eta,
     max_iter = iter,
-    adaptive = TRUE,
-    alpha_adaptive = FALSE,
+    adaptive = FALSE,
+    alpha_adaptive = TRUE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,
@@ -472,14 +472,14 @@ if(opt$testing){
   
   # Store results
   #results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  #print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
-  print(paste("Iteration:", iter, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
+  print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
+  #print(paste("Iteration:", iter, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
   #   }
-  }
+  #}
 }
 #write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))

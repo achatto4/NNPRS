@@ -105,11 +105,11 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 
 # Define parameter grids (non-ADAM)
 q_thresh = 0
-exp_seq <- unique(round(exp(seq(log(1), log(100), length.out = 10))))
+exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 iters <- unique(c(1:10, exp_seq))
 
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
-alphas <- 2^-c(1:10)  # Use same alpha for all
+#alphas <- 2^-c(1:10)  # Use same alpha for all
 
 # Define parameter grids 
 # iters <- c(1000)

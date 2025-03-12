@@ -122,8 +122,8 @@ R_list <- list(data_EUR$R, data_SAS$R, data_EAS$R)
 r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
-alpha = 0.0001
-eta = 0.02
+alpha = 0.1
+eta = 0.1
 # Algorithm parameters
 alpha1 <-alpha
 alpha2 <-alpha
@@ -131,7 +131,7 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 10000
+max_iter <- 10
 
 # Load Rcpp function
 library(Rcpp)

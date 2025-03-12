@@ -107,7 +107,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 q_thresh = 0
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
-iters <- unique(round(exp(seq(log(1), log(100), length.out = 10))))
+iters <- unique(round(exp(seq(log(1), log(10000), length.out = 20))))
 
 #etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
 #alphas <- 2^-c(1:10)  # Use same alpha for all
@@ -296,7 +296,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   #iter = 1
   alpha = 10^-3
-  eta = 1/iter
+  eta = 0.1
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,

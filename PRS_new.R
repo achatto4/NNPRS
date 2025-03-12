@@ -296,7 +296,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   #iter = 1
   alpha = 10^-3
-  eta = 0.01
+  alpha_m = 0.1
+  eta = 0.1
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,
@@ -308,13 +309,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     nk_list = N0[-1],
     alpha1 = alpha,
     alpha2 = alpha,
-    alpha3 = alpha,
-    alpha4 = alpha,
+    alpha3 = alpha_m,
+    alpha4 = alpha_m,
     eta_l = eta, 
     eta_m = eta,
     max_iter = iter,
     adaptive = FALSE,
-    alpha_adaptive = TRUE,
+    alpha_adaptive = FALSE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,

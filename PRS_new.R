@@ -79,7 +79,7 @@ for ( f in sumdata_path ) {
 
 opt$chrom <- gsub("-",":",opt$chrom)
 eval(parse(text=paste0("allchrom = c(",opt$chrom,")")))
-
+print(allchrom)
 suppressWarnings(dir.create(opt$PATH_out))
 
 if(! dir.exists(opt$PATH_out)){

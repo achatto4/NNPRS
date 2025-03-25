@@ -297,7 +297,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   #iter = 1
   alpha = 0
   alpha_m = 0
-  eta = 10^-3
+  eta = 10^-1
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,

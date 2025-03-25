@@ -40,8 +40,6 @@ option_list = list(
               help="Full path and the file name of the GWAS summary statistics, separated by comma [required] [must have columns: rsid, chr, beta, beta_se, a1, a0, n_eff]"),
   make_option("--pop", action="store", default=NA, type='character',
               help="Population of the GWAS sample, separated by comma [required]"),
-  make_option("--num_samples", action="store", default=NA, type='character',
-              help="Population-wise number of samples (comma-separated values), first for target"),
   make_option("--chrom", action="store", default="1-22", type='character',
               help="The chromosome on which the model is fitted, separated by comma or dash for consecutive chromosomes [required]"),
   make_option("--verbose", action="store", default=1, type="integer",
@@ -61,7 +59,6 @@ option_list = list(
   
 )
 opt = parse_args(OptionParser(option_list=option_list))
-num_samples <- as.numeric(unlist(strsplit(opt$num_samples, ",")))
 
 NCORES <- opt$NCORES
 
@@ -79,7 +76,6 @@ for ( f in sumdata_path ) {
 
 opt$chrom <- gsub("-",":",opt$chrom)
 eval(parse(text=paste0("allchrom = c(",opt$chrom,")")))
-print(allchrom)
 suppressWarnings(dir.create(opt$PATH_out))
 
 if(! dir.exists(opt$PATH_out)){
@@ -104,7 +100,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 #results <- data.frame(iter = integer(), eta = numeric(), alpha = numeric(), R2 = numeric())
 
 # Define parameter grids (non-ADAM)
-q_thresh = 0
+#q_thresh = 0
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
 iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
@@ -295,7 +291,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   #iter = 1
-  alpha = 0
+  alpha = 10^-3
   alpha_m = 0
   eta = 0.1
   tryCatch({
@@ -395,8 +391,8 @@ score <- score[m,,drop=F]
 colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 
 # Select the top 10% highest absolute scores
-threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
-score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
+# threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
+# score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
 
 fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
 

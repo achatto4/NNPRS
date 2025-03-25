@@ -449,7 +449,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          Rk_list.push_back(Rk);
        }
      }
-     double p = 1.5;  // Example: 3/2 in decimal form
+     double p = 1;  // Example: 3/2 in decimal form
      double inv_num_rows = 1.0 / std::pow(indx_mat.n_rows, p);
      //double inv_num_rows = 1.0 / indx_mat.n_rows;
      // Call gradient descent function with correct inputs
@@ -480,7 +480,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
          nk_list,
          rk_list,
          Rk_list,
-         alpha1, alpha2, alpha3, alpha4,
+         inv_num_rows, inv_num_rows, inv_num_rows, inv_num_rows,
          eta, beta1, beta2, epsilon, max_iter
        );
      } else {

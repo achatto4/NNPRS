@@ -359,7 +359,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     eta_m = eta,
     max_iter = iter,
     adaptive = FALSE,
-    alpha_adaptive =FALSE,
+    alpha_adaptive = TRUE,
     eta = 0.001,
     beta1 = 0.9,
     beta2 = 0.999,

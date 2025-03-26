@@ -293,7 +293,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   #iter = 1
   alpha = 10^-2
   alpha_m = 10^-2
-  #eta = 0.1
+  eta = 0.1
   
   ######################
   # # Load required libraries

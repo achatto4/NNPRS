@@ -556,6 +556,7 @@ for (iter in iters) {
     # print(R2)
     
     # Store results
+    cat(sprintf("iter = %d, eta = %f, alpha = %f, R2 = %f\n", iter, eta, alpha, R2))
     results <- rbind(results, data.frame(chr = allchrom, iter = iter, eta = eta, alpha = alpha, R2 = R2))
   }
     }

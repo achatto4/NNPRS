@@ -113,12 +113,13 @@ alphas <- 2^-seq(1,14,by =2)  # Use same alpha for all
 # alphas <- c(0.01)  # Use same alpha for all
 
 for (iter in iters) {
+  progress_percentage <- which(iters == iter) * 5
+  
+  cat(sprintf("Total run completed: %d%%\n", progress_percentage))
   for (eta in etas) {
   for (alpha in alphas) {
     
-    progress_percentage <- which(iters == iter) * 5
-    
-    cat(sprintf("Total run completed: %d%%\n", progress_percentage))
+   
   
   ############
   ## Step 1.1. Loading summary data and matching to reference data
@@ -559,12 +560,13 @@ for (iter in iters) {
     cat(sprintf("iter = %d, eta = %f, alpha = %f, R2 = %f\n", iter, eta, alpha, R2))
     results <- rbind(results, data.frame(chr = allchrom, iter = iter, eta = eta, alpha = alpha, R2 = R2))
   }
-    }
+  } 
   }
+  # Define the file path with chr number in the filename
+  file_path <- sprintf("/dcs04/nilanjan/data/Anagh/PRS_proj/chrom_res/chr%d_results.csv", allchrom)
+  write.csv(results, file_path, row.names = FALSE)
 }
-# Define the file path with chr number in the filename
-file_path <- sprintf("/dcs04/nilanjan/data/Anagh/PRS_proj/chrom_res/chr%d_results.csv", allchrom)
-write.csv(results, file_path, row.names = FALSE)
+
 
 #write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))

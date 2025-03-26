@@ -389,6 +389,57 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
    );
  }
  
+ // [[Rcpp::depends(RcppArmadillo)]]
+ // [[Rcpp::export]]
+ Rcpp::List gradient_descent_h_g_ADAM(
+     arma::vec y0, arma::mat X0, 
+     arma::vec beta_summ, arma::vec h_hat, arma::vec g_hat,
+     double eta, double beta1, double beta2, double epsilon, int max_iter) {
+   
+   int p = X0.n_cols;
+   
+   // Initialize h and g from given inputs
+   arma::vec h = h_hat;
+   arma::vec g = g_hat;
+   
+   // Initialize ADAM momentum terms
+   arma::vec m_h = arma::zeros<arma::vec>(p), v_h = arma::zeros<arma::vec>(p);
+   arma::vec m_g = arma::zeros<arma::vec>(p), v_g = arma::zeros<arma::vec>(p);
+   
+   // Optimization loop for h and g
+   for (int m = 1; m <= max_iter; ++m) {
+     arma::vec residual0 = y0 - X0 * (beta_summ + arma::square(h) - arma::square(g));
+     
+     arma::vec grad_h = -2 * X0.t() * (residual0 % h);
+     arma::vec grad_g = 2 * X0.t() * (residual0 % g);
+     
+     // ADAM update
+     m_h = beta1 * m_h + (1 - beta1) * grad_h;
+     v_h = beta2 * v_h + (1 - beta2) * arma::square(grad_h);
+     m_g = beta1 * m_g + (1 - beta1) * grad_g;
+     v_g = beta2 * v_g + (1 - beta2) * arma::square(grad_g);
+     
+     arma::vec m_h_hat = m_h / (1 - std::pow(beta1, m));
+     arma::vec v_h_hat = v_h / (1 - std::pow(beta2, m));
+     arma::vec m_g_hat = m_g / (1 - std::pow(beta1, m));
+     arma::vec v_g_hat = v_g / (1 - std::pow(beta2, m));
+     
+     h -= (eta / X0.n_rows) * m_h_hat / (arma::sqrt(v_h_hat) + epsilon);
+     g -= (eta / X0.n_rows) * m_g_hat / (arma::sqrt(v_g_hat) + epsilon);
+   }
+   
+   // Final estimates
+   arma::vec h_final = h;
+   arma::vec g_final = g;
+   arma::vec beta_hat = beta_summ + arma::square(h_final) - arma::square(g_final);
+   
+   return Rcpp::List::create(
+     Rcpp::Named("hat_h") = h_final,
+     Rcpp::Named("hat_g") = g_final,
+     Rcpp::Named("hat_beta") = beta_hat
+   );
+ }
+ 
  
 // Function to apply gradient descent transfer learning across all blocks
 // [[Rcpp::export]]
@@ -509,6 +560,7 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
        }
      }
      
+     
      // Extract beta vector for the target population
      arma::vec beta_vec = as<arma::vec>(beta_block["hat_beta"]);
      arma::vec indx_binary = arma::conv_to<arma::vec>::from(indx_mat.col(0) != 0);
@@ -519,6 +571,10 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
      // Store the final beta vector in the results
      beta_results[bl] = Rcpp::List::create(Rcpp::Named("b") = beta_final);
    }
+   
+     // beta_final = gradient_descent_h_g_ADAM(arma::vec y0, arma::mat X0, 
+     //                         arma::vec beta_summ, arma::vec h_hat, arma::vec g_hat,
+     //                         double eta, double beta1, double beta2, double epsilon, int max_iter)
 
    return beta_results;
  }

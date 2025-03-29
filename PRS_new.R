@@ -105,7 +105,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 # iters <- unique(c(1:10, exp_seq))
 #iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
 iters <- c(1:3)
-etas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
 alphas <- c(1,0.5,0.1,0.05,0.01,0.005,0.001)  # Use same alpha for all
 
 # Define parameter grids 

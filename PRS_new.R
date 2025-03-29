@@ -103,10 +103,10 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 #q_thresh = 0
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
-iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
-
-#etas <- c(0.01, 0.001, 0.1, 0.0001)  # Use same eta for all
-#alphas <- 2^-c(1:10)  # Use same alpha for all
+#iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
+iters <- c(1:3)
+etas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+alphas <- c(1,0.5,0.1,0.05,0.01,0.005,0.001)  # Use same alpha for all
 
 # Define parameter grids 
 #iters <- c(1)
@@ -114,8 +114,8 @@ iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
 # alphas <- c(0.01)  # Use same alpha for all
 
 for (iter in iters) {
-#for (eta in etas) {
-#for (alpha in alphas) {
+for (eta in etas) {
+for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data
@@ -291,9 +291,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
   #iter = 1
-  alpha = 10^-2
-  alpha_m = 10^-2
-  eta = 1
+  # alpha = 10^-2
+  # alpha_m = 10^-2
+  # eta = 1
   
   ######################
   # # Load required libraries
@@ -353,8 +353,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     nk_list = N0[-1],
     alpha1 = alpha,
     alpha2 = alpha,
-    alpha3 = alpha_m,
-    alpha4 = alpha_m,
+    alpha3 = alpha,
+    alpha4 = alpha,
     eta_l = eta, 
     eta_m = eta,
     max_iter = iter,
@@ -547,14 +547,14 @@ if(opt$testing){
   
   # Store results
   #results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
+  #print(paste("Iteration:", iter, "| R²:", R2, "-> Appending results to the dataframe!"))
   #print(paste("Iteration:", iter, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
-  # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
+  print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
-  #   }
-  #}
+    }
+  }
 }
 #write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))

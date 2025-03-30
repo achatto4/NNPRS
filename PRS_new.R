@@ -296,13 +296,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # Assign alpha based on chromosome number
   if (chr >= 1 & chr <= 21) {
     alpha <- 10^-4
-  } else if (chr >= 21 & chr <= 22) {
+  } else if (chr >= 22 & chr <= 22) {
     alpha <- 0.5
   } else {
     alpha <- NA  # Handle cases outside chromosomes 1-22
   }
   
-  
+  print(alpha)
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
     summ_list,

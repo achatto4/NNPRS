@@ -46,3 +46,28 @@ best_r2_matrix <- do.call(rbind, best_r2_rows)
 
 # Sum of the highest R2 values from all chromosomes
 total_max_r2_sum <- sum(best_r2_matrix[,5])
+
+
+
+############rough
+
+# Initialize an empty list to store the best rows
+best_r2_rows <- list()
+
+# Loop through each chromosome's data
+for (i in 1:length(result)) {
+  # Filter the data to include only rows where iter == 1 and eta == 1
+  iter_eta_1_data <- result[[i]][result[[i]]$iter == 1 & result[[i]]$eta == 1 , ]
+  #  & result[[i]]$eta == 1 & result[[i]]$alpha == 1/2^13 
+  # Find the row with the maximum R2 value for this chromosome where iter == 1 and eta == 1
+  if (nrow(iter_eta_1_data) > 0) {
+    best_row <- iter_eta_1_data[which.max(iter_eta_1_data$R2), ]
+    
+    # Store the best row in the list
+    best_r2_rows[[i]] <- best_row
+  }
+}
+
+# Combine all the best rows into a matrix (or dataframe)
+best_r2_matrix_t <- do.call(rbind, best_r2_rows)
+best_r2_matrix_t

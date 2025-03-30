@@ -294,57 +294,6 @@ for (iter in iters) {
     
     # Ensure verbose logging is enabled if verbose == 2
     if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-    #iter = 1
-    # alpha = 10^-2
-    # alpha_m = 10^-2
-    # eta = 1
-    # 
-    ######################
-    # # Load required libraries
-    # library(data.table)
-    # 
-    # fam <- fread(paste0(opt$bfile_tuning, ".fam"), header = FALSE)
-    # 
-    # # Load phenotype file if specified
-    # if (!is.na(opt$pheno_tuning)) {
-    #   pheno <- fread(opt$pheno_tuning, header = FALSE)
-    #   
-    #   # Match phenotype data with .fam based on IDs
-    #   m <- match(paste(fam$V1, fam$V2), paste(pheno$V1, pheno$V2))
-    #   m.keep <- !is.na(m)
-    #   
-    #   fam <- fam[m.keep, , drop = FALSE]
-    #   pheno <- pheno[m[m.keep], , drop = FALSE]
-    # } else {
-    #   # Use the 6th column from .fam as phenotype if no file is provided
-    #   pheno <- fam[, .(V1, V2, V6)]
-    # }
-    # 
-    # # Remove samples with missing phenotype values
-    # m <- is.na(pheno$V3)
-    # fam <- fam[!m, , drop = FALSE]
-    # pheno <- pheno[!m, , drop = FALSE]
-    # 
-    # # Load genotype matrix (assumes PLINK binary files)
-    # bed_file <- paste0(opt$bfile_tuning, ".bed")
-    # bim_file <- paste0(opt$bfile_tuning, ".bim")
-    # 
-    # # Read genotype data using PLINK2 or bigsnpr (alternative: snpStats)
-    # library(bigsnpr)
-    # snp_data <- snp_readBed(bed_file, backingfile = tempfile())
-    # G <- snp_attach(snp_data)$genotypes
-    # 
-    # # Extract X (genotype matrix) and y (phenotype)
-    # X <- G[fam$V2, ]  # Keep individuals matching .fam
-    # y <- as.numeric(pheno$V3)  # Convert phenotype to numeric
-    # 
-    # # Center and scale X (optional but recommended)
-    # X <- scale(X)
-    # 
-    # # Output X and y
-    # list(X = X, y = y)
-    # print("DONE")
-    #########################
     
     tryCatch({
       res <- gradient_descent_transfer_learning_all_blocks(
@@ -452,34 +401,7 @@ for (iter in iters) {
   if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
   if (opt$verbose == 2) cat("\n** Step 2.7 ended **\n")
   ################
-  # if(opt$tuning){
-  #   # Make/fetch the phenotype file
-  #   fam <- read.table(paste(opt$bfile_tuning,".fam",sep=''),as.is=T)
-  #   if ( !is.na(opt$pheno_testing) ) {
-  #     pheno <- read.table(opt$pheno_tuning, as.is=T)
-  #     # Match up data
-  #     m <- match( paste(fam[,1],fam[,2]) , paste(pheno[,1],pheno[,2]) )
-  #     m.keep <- !is.na(m)
-  #     fam <- fam[m.keep,,drop=F]
-  #     pheno <- pheno[m[m.keep],,drop=F]
-  #   } else {
-  #     pheno <- fam[,c(1,2,6)]
-  #   }
-  #   m <- is.na(pheno[,3]) # Remove samples with missing phenotype
-  #   fam <- fam[!m,,drop=F]
-  #   pheno <- pheno[!m,,drop=F]
-  #  
-  #   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
-  #                 " --bfile ",opt$bfile_tuning,
-  #                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
-  #                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
-  #                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_tuning")
-  #     }
-  # }
-  
-  
-  
-  ################
+
   
   if(opt$testing){
     

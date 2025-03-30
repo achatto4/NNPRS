@@ -104,18 +104,18 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
 #iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
-iters <- c(1:3)
-etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
-alphas <- c(1,0.5,0.1,0.05,0.01,0.005,0.001)  # Use same alpha for all
+# iters <- c(1:3)
+# etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
+# alphas <- c(1,0.5,0.1,0.05,0.01,0.005,0.001)  # Use same alpha for all
 
 # Define parameter grids 
 #iters <- c(1)
 #etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
-for (iter in iters) {
-for (eta in etas) {
-for (alpha in alphas) {
+# for (iter in iters) {
+# for (eta in etas) {
+# for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data
@@ -174,6 +174,7 @@ registerDoMC(NCORES)
 ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) %dopar% {
   
   chr <- allchrom[j]
+  
   
   ############
   ## Step 2.1. Extract variants in both provided summary statistics and reference data
@@ -290,10 +291,16 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-  #iter = 1
-  # alpha = 10^-2
-  # alpha_m = 10^-2
-  # eta = 1
+  iter = 1
+  eta = 1
+  # Assign alpha based on chromosome number
+  if (chr >= 1 & chr <= 15) {
+    alpha <- 10^-4
+  } else if (chr >= 16 & chr <= 22) {
+    alpha <- 0.125
+  } else {
+    alpha <- NA  # Handle cases outside chromosomes 1-22
+  }
   
   ######################
   # # Load required libraries
@@ -553,9 +560,9 @@ if(opt$testing){
   print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
-    }
-  }
-}
+#     }
+#   }
+# }
 #write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 

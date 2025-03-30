@@ -297,7 +297,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   if (chr >= 1 & chr <= 15) {
     alpha <- 10^-4
   } else if (chr >= 16 & chr <= 22) {
-    alpha <- 0.125
+    alpha <- 0.5
   } else {
     alpha <- NA  # Handle cases outside chromosomes 1-22
   }
@@ -453,35 +453,7 @@ fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names
 
 if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
 if (opt$verbose == 2) cat("\n** Step 2.7 ended **\n")
-################
-# if(opt$tuning){
-#   # Make/fetch the phenotype file
-#   fam <- read.table(paste(opt$bfile_tuning,".fam",sep=''),as.is=T)
-#   if ( !is.na(opt$pheno_testing) ) {
-#     pheno <- read.table(opt$pheno_tuning, as.is=T)
-#     # Match up data
-#     m <- match( paste(fam[,1],fam[,2]) , paste(pheno[,1],pheno[,2]) )
-#     m.keep <- !is.na(m)
-#     fam <- fam[m.keep,,drop=F]
-#     pheno <- pheno[m[m.keep],,drop=F]
-#   } else {
-#     pheno <- fam[,c(1,2,6)]
-#   }
-#   m <- is.na(pheno[,3]) # Remove samples with missing phenotype
-#   fam <- fam[!m,,drop=F]
-#   pheno <- pheno[!m,,drop=F]
-#  
-#   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
-#                 " --bfile ",opt$bfile_tuning,
-#                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
-#                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
-#                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_tuning")
-#     }
-# }
 
- 
-
-################
 
 if(opt$testing){
   

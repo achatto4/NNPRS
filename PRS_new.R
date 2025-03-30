@@ -295,59 +295,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   eta = 1
   # Assign alpha based on chromosome number
   if (chr >= 1 & chr <= 15) {
-    alpha <- 10^-4
+    alpha <- 10^-3
   } else if (chr >= 16 & chr <= 22) {
     alpha <- 0.5
   } else {
     alpha <- NA  # Handle cases outside chromosomes 1-22
   }
   
-  ######################
-  # # Load required libraries
-  # library(data.table)
-  # 
-  # fam <- fread(paste0(opt$bfile_tuning, ".fam"), header = FALSE)
-  # 
-  # # Load phenotype file if specified
-  # if (!is.na(opt$pheno_tuning)) {
-  #   pheno <- fread(opt$pheno_tuning, header = FALSE)
-  #   
-  #   # Match phenotype data with .fam based on IDs
-  #   m <- match(paste(fam$V1, fam$V2), paste(pheno$V1, pheno$V2))
-  #   m.keep <- !is.na(m)
-  #   
-  #   fam <- fam[m.keep, , drop = FALSE]
-  #   pheno <- pheno[m[m.keep], , drop = FALSE]
-  # } else {
-  #   # Use the 6th column from .fam as phenotype if no file is provided
-  #   pheno <- fam[, .(V1, V2, V6)]
-  # }
-  # 
-  # # Remove samples with missing phenotype values
-  # m <- is.na(pheno$V3)
-  # fam <- fam[!m, , drop = FALSE]
-  # pheno <- pheno[!m, , drop = FALSE]
-  # 
-  # # Load genotype matrix (assumes PLINK binary files)
-  # bed_file <- paste0(opt$bfile_tuning, ".bed")
-  # bim_file <- paste0(opt$bfile_tuning, ".bim")
-  # 
-  # # Read genotype data using PLINK2 or bigsnpr (alternative: snpStats)
-  # library(bigsnpr)
-  # snp_data <- snp_readBed(bed_file, backingfile = tempfile())
-  # G <- snp_attach(snp_data)$genotypes
-  # 
-  # # Extract X (genotype matrix) and y (phenotype)
-  # X <- G[fam$V2, ]  # Keep individuals matching .fam
-  # y <- as.numeric(pheno$V3)  # Convert phenotype to numeric
-  # 
-  # # Center and scale X (optional but recommended)
-  # X <- scale(X)
-  # 
-  # # Output X and y
-  # list(X = X, y = y)
-  # print("DONE")
-#########################
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(

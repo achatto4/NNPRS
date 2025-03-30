@@ -113,6 +113,14 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 #etas <- c(0.01)  # Use same eta for all
 # alphas <- c(0.01)  # Use same alpha for all
 
+best_r2_matrix <- data.frame(
+  chr = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22),
+  iter = c(1, 2336, 546, 336, 127, 10000, 1, 2, 886, 30, 3, 1, 2336, 2, 78, 10000, 3, 3793, 4, 3, 6158, 4),
+  eta = c(1e-02, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-03, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-04, 1e-01, 1e-01, 1e-01, 1e-01, 1e+00, 1e-01, 1e-02),
+  alpha = c(0.0004882812, 0.0078125000, 0.1250000000, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0004882812, 0.0312500000, 0.0001220703, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0001220703, 0.0312500000, 0.5000000000, 0.0078125000, 0.5000000000, 0.1250000000, 0.1250000000, 0.5000000000),
+  R2 = c(0.0005488818, 0.0014077704, 0.0017860057, 0.0009336795, 0.0006260600, 0.0005661561, 0.0006902569, 0.0010458155, 0.0006626079, 0.0009741553, 0.0012245231, 0.0010396176, 0.0006493658, 0.0008332242, 0.0007757897, 0.0004932084, 0.0002750842, 0.0006249549, 0.0008175016, 0.0007661408, 0.0006504745, 0.0003130755)
+)
+
 # for (iter in iters) {
 # for (eta in etas) {
 # for (alpha in alphas) {
@@ -291,16 +299,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Ensure verbose logging is enabled if verbose == 2
   if (opt$verbose == 2) cat("\n** Step 2.3 started for chromosome ", chr, " **\n")
-  iter = 1
-  eta = 1
-  # Assign alpha based on chromosome number
-  if (chr >= 1 & chr <= 21) {
-    alpha <- 10^-4
-  } else if (chr >= 22 & chr <= 22) {
-    alpha <- 0.5
-  } else {
-    alpha <- NA  # Handle cases outside chromosomes 1-22
-  }
+  
+  alpha = best_r2_matrix[chr, 4]
+  eta = best_r2_matrix[chr, 3]
+  iter = best_r2_matrix[chr, 2]
   
   print(alpha)
   tryCatch({

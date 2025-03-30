@@ -295,9 +295,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   eta = 1
   # Assign alpha based on chromosome number
   if (chr >= 1 & chr <= 15) {
-    alpha <- 10^-3
+    alpha <- 10^-4
   } else if (chr >= 16 & chr <= 22) {
-    alpha <- 10^-3
+    alpha <- 10^-4
   } else {
     alpha <- NA  # Handle cases outside chromosomes 1-22
   }

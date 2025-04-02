@@ -405,11 +405,20 @@ if (opt$verbose == 2) cat("\n** Step 2.6 ended **\n")
 ############
 ## Step 2.7. Combine all chromosomes
 if (opt$verbose == 2) cat("\n** Step 2.7 started **\n")
-score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
+# score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
+#   chr <- allchrom[j]
+#   prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
+#   return(prs)
+# }
+
+score_list <- foreach(j = 1:length(allchrom)) %dopar% {
   chr <- allchrom[j]
   prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
   return(prs)
 }
+
+score <- do.call(rbind, score_list)  # Explicitly concatenate
+
 registerDoMC(1)
 tmp <- score[,4] != 0; m <- !(tmp==0)
 score <- score[m,,drop=F]

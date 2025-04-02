@@ -57,7 +57,7 @@ best_r2_rows <- list()
 # Loop through each chromosome's data
 for (i in 1:length(result)) {
   # Filter the data to include only rows where iter == 1 and eta == 1
-  iter_eta_1_data <- result[[i]][result[[i]]$iter == 7 & result[[i]]$eta == 1e-04 & result[[i]]$alpha == 1/2^11, ]
+  iter_eta_1_data <- result[[i]][result[[i]]$iter < 10, ]
   #  & result[[i]]$eta == 1 & result[[i]]$alpha == 1/2^13 
   # Find the row with the maximum R2 value for this chromosome where iter == 1 and eta == 1
   if (nrow(iter_eta_1_data) > 0) {

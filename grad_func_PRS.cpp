@@ -195,11 +195,11 @@ Rcpp::List gradient_descent_transfer_learning_rcpp_PRS(
   arma::vec hat_beta = arma::square(hat_u) - arma::square(hat_v) + arma::square(hat_h) - arma::square(hat_g);
   
   // Scale hat_beta so that median of absolute values is 10^-4
-  arma::vec abs_hat_beta = arma::abs(hat_beta);
-  double median_abs_beta = arma::median(abs_hat_beta);
-  if (median_abs_beta != 0) {
-    hat_beta = hat_beta * (1e-4 / median_abs_beta);
-  }
+  // arma::vec abs_hat_beta = arma::abs(hat_beta);
+  // double median_abs_beta = arma::median(abs_hat_beta);
+  // if (median_abs_beta != 0) {
+  //   hat_beta = hat_beta * (1e-4 / median_abs_beta);
+  // }
   
   
   return Rcpp::List::create(

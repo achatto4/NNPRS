@@ -318,9 +318,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # eta = best_r2_matrix[chr, 3]
   # iter = best_r2_matrix[chr, 2]
   
-iter <- 100
-eta <- 0.01  # Use same eta for all
-alpha <- 0.01  # Use same alpha for all
+iter <- 10000
+eta <- 10^-4  # Use same eta for all
+alpha <- 0.001  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(

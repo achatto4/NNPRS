@@ -42,6 +42,7 @@ for (i in 1:length(result)) {
 
 # Combine all the best rows into a matrix (or dataframe)
 best_r2_matrix <- do.call(rbind, best_r2_rows)
+best_r2_matrix
 ##########
 
 # Sum of the highest R2 values from all chromosomes
@@ -49,28 +50,43 @@ total_max_r2_sum <- sum(best_r2_matrix[,5])
 
 ###############
 
+# best_r2_matrix <- data.frame(
+#   chr = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22),
+#   iter = c(1, 2336, 546, 336, 127, 10000, 1, 2, 886, 30, 3, 1, 2336, 2, 78, 10000, 3, 3793, 4, 3, 6158, 4),
+#   eta = c(1e-02, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-03, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-04, 1e-01, 1e-01, 1e-01, 1e-01, 1e+00, 1e-01, 1e-02),
+#   )
+alpha1 = c(0.0004882812, 0.0078125000, 0.1250000000, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0004882812, 0.0312500000, 0.0001220703, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0001220703, 0.0312500000, 0.5000000000, 0.0078125000, 0.5000000000, 0.1250000000, 0.1250000000, 0.5000000000)
+
 best_r2_matrix <- data.frame(
   chr = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22),
   iter = c(1, 2336, 546, 336, 127, 10000, 1, 2, 886, 30, 3, 1, 2336, 2, 78, 10000, 3, 3793, 4, 3, 6158, 4),
   eta = c(1e-02, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-03, 1e+00, 1e-04, 1e+00, 1e-04, 1e-02, 1e-01, 1e-04, 1e-01, 1e-01, 1e-01, 1e-01, 1e+00, 1e-01, 1e-02),
-  alpha = c(0.0004882812, 0.0078125000, 0.1250000000, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0004882812, 0.0312500000, 0.0001220703, 0.1250000000, 0.0001220703, 0.5000000000, 0.5000000000, 0.0001220703, 0.0312500000, 0.5000000000, 0.0078125000, 0.5000000000, 0.1250000000, 0.1250000000, 0.5000000000)
-)
+  alpha = 2^(log(alpha)/log(2))
+  )
+
 
 # Initialize an empty list to store the best rows
-best_r2_rows <- list()
+best_r2_rows <- vector("list", length(result))
 
 # Loop through each chromosome's data
-for (i in 1:length(result)) {
-  # Find the row with the maximum R2 value for this chromosome
-  best_row <- result[[i]][(result[[i]]$iter == best_r2_matrix[i,2] & result[[i]]$eta == best_r2_matrix[i,3] & result[[i]]$alpha == best_r2_matrix[i,4]),]
+for (i in seq_along(result)) {
+  df <- result[[i]]
+  df[]
+  # Extract the best parameters for this chromosome
+  best_iter  <- best_r2_matrix[i, 2]
+  best_eta   <- best_r2_matrix[i, 3]
+  best_alpha <- best_r2_matrix[i, 4]
   
-  # Store the best row in the list
+  # Find the row(s) matching the best parameters
+  best_row <- df[df$iter == best_iter & df$eta == best_eta & df$alpha == best_alpha,]
+  
+  # Store the best row(s) in the list
   best_r2_rows[[i]] <- best_row
 }
 
 # Combine all the best rows into a matrix (or dataframe)
-best_r2_matrix <- do.call(rbind, best_r2_rows)
-best_r2_matrix
+best_r2_rowsf <- do.call(rbind, best_r2_rows)
+best_r2_rowsf
 
 ############rough
 

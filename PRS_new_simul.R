@@ -77,14 +77,14 @@ generate_synthetic_data <- function(n, p, beta) {
 }
 
 # Parameters
-p <- 100  # Number of SNPs
+p <- 1000  # Number of SNPs
 n_EUR <- 1000  # Sample size for EUR
 n_SAS <- 200  # Sample size for SAS
 n_EAS <- 200  # Sample size for EAS
 n_AFR <- 100  # Sample size for AFR (main population)
 
 # Set parameters
-percentage_nonzero <- 0.01  # 1% non-zero SNPs
+percentage_nonzero <- 0.001  # 1% non-zero SNPs
 num_nonzero <- ceiling(p * percentage_nonzero)
 
 # Initialize beta with zeros
@@ -95,7 +95,7 @@ set.seed(123)
 nonzero_indices <- sample(1:p, num_nonzero)
 
 # Assign random values to non-zero indices
-beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.1)
+beta1[nonzero_indices] <- rnorm(num_nonzero, mean = 0, sd = 0.001)
 
 # Generate synthetic data for auxiliary populations
 data_EUR <- generate_synthetic_data(n_EUR, p, beta1)
@@ -107,7 +107,7 @@ data_AFR <- generate_synthetic_data(n_AFR, p, beta1)
 
 # Introduce jitter to beta for AFR population
 set.seed(1)
-beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.001)
+beta_AFR <- beta1 + rnorm(p, mean = 0, sd = 0.0001)
 
 data_AFR_jittered <- generate_synthetic_data(n_AFR, p, beta_AFR)
 
@@ -123,7 +123,7 @@ r_list <- list(data_EUR$r, data_SAS$r, data_EAS$r)
 n_list <- c(n_EUR, n_SAS, n_EAS)
 
 alpha = 0.1
-eta = 0.1
+eta = 1
 # Algorithm parameters
 alpha1 <-alpha
 alpha2 <-alpha
@@ -131,7 +131,7 @@ alpha3 <-alpha
 alpha4 <-alpha
 eta_l <-eta
 eta_m <-eta
-max_iter <- 10
+max_iter <- 1000
 
 # Load Rcpp function
 library(Rcpp)

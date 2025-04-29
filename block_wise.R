@@ -338,8 +338,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # eta = best_r2_matrix[chr, 3]
   # iter = best_r2_matrix[chr, 2]
   
-  iter <- 100
-  eta <- 10^-3  # Use same eta for all
+  iter <- 1
+  eta <- 1  # Use same eta for all
   alpha <- 0.001  # Use same alpha for all
   
   tryCatch({

@@ -243,6 +243,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
   
+  # Save block 1 SNPs after Step 2.1
+  block1_snps_chr <- snps_list0[[1]][[1]]  # first ethnic group (l=1), first block (block=1)
+  writeLines(
+    block1_snps_chr,
+    paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt")
+  )
+  
   nblock <- length(LD_list0[[l]])
   #nblock <- 1
   if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
@@ -302,13 +309,12 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   indx_block <- indx_block1
   snp_list <- snp_list1
   
-  # ── write merged block 1 SNPs for this chr ──
+  block1_snps_chr <- snp_list1[[1]]
   writeLines(
-    snp_list1[[1]],
-    con = paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt")
+    block1_snps_chr,
+    paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt")
   )
   
-
   Nsnps <- Nsnps1
   N <- N0
   #testing
@@ -485,25 +491,13 @@ if(opt$testing){
   }
   if (opt$verbose == 2) cat("\n** Step 3.1 ended **\n")
   ############
-  
-  # ── merge all per-chr block 1 lists ──
-  all_block1_snps <- lapply(allchrom, function(chr) {
-    readLines(paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt"))
-  }) |> unlist() |> unique()
-  
-  writeLines(
-    all_block1_snps,
-    con = paste0(opt$PATH_out, "/tmp/block1_snps_all_chr.txt")
-  )
-  
-  
   ## Step 3.2. Calculate scores for all tuning parameter settings on tuning samples
   if (opt$verbose == 2) cat("\n** Step 3.2 started  **\n")
   if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
-                " --extract ", opt$PATH_out, "/tmp/block1_snps_all_chr.txt",
-                " --score ",   opt$PATH_out, "/before_ensemble/score_file.txt header-read",
+                "--extract", paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt"),
+                " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")
   # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)

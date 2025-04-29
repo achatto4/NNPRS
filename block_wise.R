@@ -374,6 +374,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     # Multiply beta vector (tmp1) by SNP scaling (tmp2)
     if (bl == 1) {
       b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
+      writeLines(
+        as.character(b_tmp),
+        paste0(opt$PATH_out, "/block1_beta.txt")
+      )
     } else {
       b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
     }
@@ -381,6 +385,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   # Final PRS matrix
   prs <- b_tmp
+  
   #testing
   
   # Clean the PRS matrix

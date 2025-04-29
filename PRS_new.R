@@ -358,19 +358,26 @@ alpha <- 0.001  # Use same alpha for all
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
 
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
-  for (bl in 1:nblock) {
-    tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
-    tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
-    dim(res[[bl]]$b);dim(snps_scale[[bl]])
-    tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
-    
-    # Multiply beta vector (tmp1) by SNP scaling (tmp2)
-    if (bl == 1) {
-      b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
-    } else {
-      b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
-    }
-  }
+  # for (bl in 1:nblock) {
+  #   tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
+  #   tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
+  #   dim(res[[bl]]$b);dim(snps_scale[[bl]])
+  #   tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
+  #   
+  #   # Multiply beta vector (tmp1) by SNP scaling (tmp2)
+  #   if (bl == 1) {
+  #     b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
+  #   } else {
+  #     b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
+  #   }
+  # }
+
+# — only use block 1 for the final PRS —
+tmp1  <- res[[1]]$b              # betas from block 1
+tmp2  <- snps_scale[[1]][,1]     # scale factors from block 1
+tmp2[is.na(tmp2)] <- 0           # safety
+prs   <- tmp1 * tmp2             # final PRS is just block 1
+
   
   # Final PRS matrix
   prs <- b_tmp

@@ -238,9 +238,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     summ_list0[[l]] <- lapply(tmp, FUN=function (x){ x$beta_hat } )
     snps_scale0[[l]] <- lapply(tmp, FUN=function (x){ x$snps_scale } )
     
+    # Get only the rsid values from the first block (tmp[[1]])
+    rsids_block1 <- tmp[[1]]$rsid
+    
+    # Write the rsids to a text file, one per line
     writeLines(
-      as.character(tmp[[1]]),
-      paste0(opt$PATH_out, "/block1_snps.txt")
+      as.character(rsids_block1),
+      file.path(opt$PATH_out, "block1_snps.txt")
     )
     
     if ( opt$verbose == 2 ) cat(paste0(sum(Nsnps0[[l]])," SNPs are included in the analysis of ",ethnic[l]," on CHR",chr,messageflip))
@@ -372,19 +376,19 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     # Multiply beta vector (tmp1) by SNP scaling (tmp2)
     if (bl == 1) {
       b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
-      # writeLines(
-      #   as.character(b_tmp),
-      #   paste0(opt$PATH_out, "/block1_beta.txt")
-      # )
+      writeLines(
+        as.character(b_tmp),
+        paste0(opt$PATH_out, "/block1_beta.txt")
+      )
     } else {
       b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
     }
   }
-  print(length(b_tmp))
-  writeLines(
-    as.character(b_tmp),
-    paste0(opt$PATH_out, "/block1_beta.txt")
-  )
+  # print(length(b_tmp))
+  # writeLines(
+  #   as.character(b_tmp),
+  #   paste0(opt$PATH_out, "/block1_beta.txt")
+  # )
   
   # Final PRS matrix
   prs <- b_tmp

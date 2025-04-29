@@ -388,7 +388,8 @@ prs   <- tmp1 * tmp2             # final PRS is just block 1
   prs[prs < -10] <- 0   # Set values less than -10 to 0
   #print(summary(prs))
   # Clean up temporary variables
-  rm(list = c("tmp1", "tmp2", "b_tmp"))
+  # rm(list = c("tmp1", "tmp2", "b_tmp"))
+  rm(list = c("tmp1", "tmp2"))
   
   if (opt$verbose == 2) cat("\n** Step 2.4 ended for chromosome ", chr, " **\n")
   ############

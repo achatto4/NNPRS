@@ -382,6 +382,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
       b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
     }
   }
+  print(length(b_tmp))
   writeLines(
     as.character(b_tmp),
     paste0(opt$PATH_out, "/block1_beta.txt")

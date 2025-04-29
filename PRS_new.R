@@ -357,32 +357,24 @@ alpha <- 0.001  # Use same alpha for all
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
 
-  # # Step 2.4. Clean PRSs into a matrix (#variant X #block)
-  # for (bl in 1:nblock) {
-  #   tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
-  #   tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
-  #   dim(res[[bl]]$b);dim(snps_scale[[bl]])
-  #   tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
-  #   
-  #   # Multiply beta vector (tmp1) by SNP scaling (tmp2)
-  #   if (bl == 1) {
-  #     b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
-  #   } else {
-  #     b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
-  #   }
-  # }
-  # 
-  # # Final PRS matrix
-  # prs <- b_tmp
-  # #testing
-
-## Step 2.4. Clean PRSs into a vector (block 1 only)
-tmp1  <- res[[1]]$b               # betas from block 1
-tmp2  <- snps_scale[[1]][,1]      # scale factors from block 1
-tmp2[is.na(tmp2)] <- 0            # safety
-prs   <- tmp1 * tmp2              # final PRS is just block 1
-# clean up
-rm(tmp1, tmp2)
+  # Step 2.4. Clean PRSs into a matrix (#variant X #block)
+  for (bl in 1:nblock) {
+    tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
+    tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
+    dim(res[[bl]]$b);dim(snps_scale[[bl]])
+    tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
+    
+    # Multiply beta vector (tmp1) by SNP scaling (tmp2)
+    if (bl == 1) {
+      b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
+    } else {
+      b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
+    }
+  }
+  
+  # Final PRS matrix
+  prs <- b_tmp
+  #testing
   
   # Clean the PRS matrix
   prs[is.na(prs)] <- 0  # Set NA values to 0
@@ -390,7 +382,7 @@ rm(tmp1, tmp2)
   prs[prs < -10] <- 0   # Set values less than -10 to 0
   #print(summary(prs))
   # Clean up temporary variables
-  # rm(list = c("tmp1", "tmp2", "b_tmp"))
+  rm(list = c("tmp1", "tmp2", "b_tmp"))
   
   if (opt$verbose == 2) cat("\n** Step 2.4 ended for chromosome ", chr, " **\n")
   ############
@@ -401,24 +393,11 @@ rm(tmp1, tmp2)
   # Note: 1. In the final prs file, the columns are: (rsid, a1: effect allele, a0: reference allele, PRSs...)
   #       2. For the param file, the order of its rows is same as the order of columns for PRSs. The param file indicate the tuning parameters and score source of the PRSs.
   
-  # snps <- unlist(snp_list)
-  # ref_tmp <- ref[match(snps, ref$V2),]
-  # df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
-  
-  # only block 1 SNPs:
-  snps    <- snp_list[[1]]
+  snps <- unlist(snp_list)
   ref_tmp <- ref[match(snps, ref$V2),]
-  df      <- data.frame(
-    rsid = snps,
-    a1   = ref_tmp$V5,
-    a0   = ref_tmp$V6,
-    prs,
-    stringsAsFactors = FALSE
-  )
-  
+  df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
   
   fwrite2(df, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"), col.names = F, sep="\t", nThread=1)
-  
   
   rm(list=c("snps","snp_list","res", "df","prs"))
   
@@ -427,20 +406,6 @@ rm(tmp1, tmp2)
 
 rm(list=c("df_beta_list"))
 if (opt$verbose == 2) cat("\n** Step 2.6 ended **\n")
-
-# ── Build a global block-1 SNP extract list ──
-all_block1_snps <- lapply(allchrom, function(chr) {
-  prs_file <- paste0(opt$PATH_out, "/tmp/PRS_in_all_settings_bychrom/prs_chr", chr, ".txt")
-  # drop header, take first column (rsid)
-  v <- readLines(prs_file)[-1]
-  sub("\t.*", "", v)
-}) |> unlist() |> unique()
-
-stopifnot(is.character(all_block1_snps))
-writeLines(
-  all_block1_snps,
-  con = paste0(opt$PATH_out, "/before_ensemble/block1_snps_all_chr.txt")
-)
 ############
 ## Step 2.7. Combine all chromosomes
 if (opt$verbose == 2) cat("\n** Step 2.7 started **\n")
@@ -458,32 +423,10 @@ score_list <- foreach(j = 1:length(allchrom)) %dopar% {
 
 score <- do.call(rbind, score_list)  # Explicitly concatenate
 
-# registerDoMC(1)
-# tmp <- score[,4] != 0; m <- !(tmp==0)
-# score <- score[m,,drop=F]
-# colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
-
-# how many “score” columns do we actually have?
-num_scores <- ncol(score) - 3
-
-if (num_scores >= 1) {
-  # 1) name them
-  colnames(score) <- c(
-    "rsid", "a1", "a0",
-    paste0("score", seq_len(num_scores))
-  )
-  # 2) drop rows where the first (and only) score is zero
-  score <- score[ score[[ "score1" ]] != 0, , drop = FALSE ]
-  
-} else {
-  stop(
-    "No PRS columns found in 'score' (ncol = ", ncol(score),
-    ").\n",
-    "Make sure your prs_chr*.txt files were written properly and ",
-    "contain at least one SNP each."
-  )
-}
-
+registerDoMC(1)
+tmp <- score[,4] != 0; m <- !(tmp==0)
+score <- score[m,,drop=F]
+colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 
 # Select the top 10% highest absolute scores
 # threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
@@ -539,7 +482,6 @@ if(opt$testing){
   if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
-                " --extract ",  opt$PATH_out, "/before_ensemble/block1_snps_all_chr.txt",
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")

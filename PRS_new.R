@@ -463,16 +463,27 @@ score <- do.call(rbind, score_list)  # Explicitly concatenate
 # score <- score[m,,drop=F]
 # colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
 
-# 1) Name the columns immediately
-colnames(score) <- c(
-  "rsid", "a1", "a0",
-  paste0("score", seq_len(ncol(score) - 3))
-)
+# how many “score” columns do we actually have?
+num_scores <- ncol(score) - 3
 
-# 2) If you have a score1 column, drop all-zero rows
-if ("score1" %in% colnames(score)) {
-  score <- score[ score$score1 != 0, , drop = FALSE ]
+if (num_scores >= 1) {
+  # 1) name them
+  colnames(score) <- c(
+    "rsid", "a1", "a0",
+    paste0("score", seq_len(num_scores))
+  )
+  # 2) drop rows where the first (and only) score is zero
+  score <- score[ score[[ "score1" ]] != 0, , drop = FALSE ]
+  
+} else {
+  stop(
+    "No PRS columns found in 'score' (ncol = ", ncol(score),
+    ").\n",
+    "Make sure your prs_chr*.txt files were written properly and ",
+    "contain at least one SNP each."
+  )
 }
+
 
 # Select the top 10% highest absolute scores
 # threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile

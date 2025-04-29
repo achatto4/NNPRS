@@ -399,9 +399,21 @@ prs   <- tmp1 * tmp2             # final PRS is just block 1
   # Note: 1. In the final prs file, the columns are: (rsid, a1: effect allele, a0: reference allele, PRSs...)
   #       2. For the param file, the order of its rows is same as the order of columns for PRSs. The param file indicate the tuning parameters and score source of the PRSs.
   
-  snps <- unlist(snp_list)
+  # snps <- unlist(snp_list)
+  # ref_tmp <- ref[match(snps, ref$V2),]
+  # df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
+  # 
+  # only use the block 1 SNPs
+  snps <- snp_list[[1]]  
   ref_tmp <- ref[match(snps, ref$V2),]
-  df <- data.frame(rsid = snps, a1= ref_tmp$V5, a0= ref_tmp$V6, prs, stringsAsFactors=F)
+  df <- data.frame(
+    rsid = snps,
+    a1   = ref_tmp$V5,
+    a0   = ref_tmp$V6,
+    prs,
+    stringsAsFactors = FALSE
+  )
+  
   
   fwrite2(df, paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"), col.names = F, sep="\t", nThread=1)
   

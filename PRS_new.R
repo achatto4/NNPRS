@@ -301,6 +301,14 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   indx <- indx1
   indx_block <- indx_block1
   snp_list <- snp_list1
+  
+  # ── write merged block 1 SNPs for this chr ──
+  writeLines(
+    snp_list1[[1]],
+    con = paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt")
+  )
+  
+
   Nsnps <- Nsnps1
   N <- N0
   #testing
@@ -477,12 +485,25 @@ if(opt$testing){
   }
   if (opt$verbose == 2) cat("\n** Step 3.1 ended **\n")
   ############
+  
+  # ── merge all per-chr block 1 lists ──
+  all_block1_snps <- lapply(allchrom, function(chr) {
+    readLines(paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt"))
+  }) |> unlist() |> unique()
+  
+  writeLines(
+    all_block1_snps,
+    con = paste0(opt$PATH_out, "/tmp/block1_snps_all_chr.txt")
+  )
+  
+  
   ## Step 3.2. Calculate scores for all tuning parameter settings on tuning samples
   if (opt$verbose == 2) cat("\n** Step 3.2 started  **\n")
   if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
-                " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
+                " --extract ", opt$PATH_out, "/tmp/block1_snps_all_chr.txt",
+                " --score ",   opt$PATH_out, "/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")
   # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)

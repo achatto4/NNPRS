@@ -104,9 +104,9 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
 #iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
-# iters <- c(1:3)
-# etas <- c(1, 0.1, 0.01, 0.001, 0.0001)  # Use same eta for all
-# alphas <- c(1,0.5,0.1,0.05,0.01,0.005,0.001)  # Use same alpha for all
+iters <- c(1, 10, 100)
+etas <- c(0.1, 0.01, 0.001)  # Use same eta for all
+alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
 
 # Define parameter grids 
 #iters <- c(1)
@@ -135,9 +135,9 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 #          0.0008175016, 0.0007661408, 0.0003500529, 0.0003130755)
 # )
 
-# for (iter in iters) {
-# for (eta in etas) {
-# for (alpha in alphas) {
+for (iter in iters) {
+for (eta in etas) {
+for (alpha in alphas) {
 
 ############
 ## Step 1.1. Loading summary data and matching to reference data
@@ -338,9 +338,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # eta = best_r2_matrix[chr, 3]
   # iter = best_r2_matrix[chr, 2]
   
-  iter <- 1
-  eta <- 1  # Use same eta for all
-  alpha <- 1  # Use same alpha for all
+  # iter <- 100
+  # eta <- 0.001  # Use same eta for all
+  # alpha <- 0.1  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
@@ -546,15 +546,15 @@ if(opt$testing){
   
   # Store results
   #results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  print(paste("R²:", R2, "-> Appending results to the dataframe!"))
-  #print(paste("Iteration:", iter, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
+  #print(paste("R²:", R2, "-> Appending results to the dataframe!"))
+  print(paste("Iteration:", iter, "| Eta:", eta, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # # /dcs04/nilanjan/data/Anagh/PRS_proj/PROSPER/PROSPER_example_results/PROSPER/after_ensemble_AFR/R2.txt
 }
-#     }
-#   }
-# }
+    }
+  }
+}
 #write.csv(results, "R2_results.csv", row.names = FALSE)
 if ( opt$verbose >= 1 ) cat(paste0("** !COMPLETED! \n"))
 

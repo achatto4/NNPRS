@@ -240,13 +240,15 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     
     print(snps_list0[[l]])
     # Get only the rsid values from the first block (tmp[[1]])
-    rsids_block1 <- df_beta[match(snps_list0[[l]][[1]], df_beta$rsid),]$rsid
-    
-    # Write the rsids to a text file, one per line
-    writeLines(
-      as.character(rsids_block1),
-      file.path(opt$PATH_out, "block1_snps.txt")
-    )
+    if(l == 1){
+      rsids_block1 <- df_beta[match(snps_list0[[l]][[2]], df_beta$rsid),]$rsid
+      
+      # Write the rsids to a text file, one per line
+      writeLines(
+        as.character(rsids_block1),
+        file.path(opt$PATH_out, "block1_snps.txt")
+      )
+    }
     
     if ( opt$verbose == 2 ) cat(paste0(sum(Nsnps0[[l]])," SNPs are included in the analysis of ",ethnic[l]," on CHR",chr,messageflip))
     
@@ -382,6 +384,14 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
       )
     } else {
       b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
+    }
+    
+    if (bl == 2) {
+      b_tmp <- tmp1 * tmp2  # For the first block, initialize 'b_tmp'
+      writeLines(
+        as.character(b_tmp),
+        paste0(opt$PATH_out, "/block1_beta.txt")
+      )
     }
   }
   # print(length(b_tmp))

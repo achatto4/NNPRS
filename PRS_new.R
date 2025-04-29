@@ -211,6 +211,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     load(paste0(opt$PATH_package,"/",ethnic[l],"/chr",chr,"_LD.RData"))
     df_beta <- df_beta_list[[l]]
     
+    if (l == 1) {  # only for first ethnic group
+      writeLines(
+        as.character(df_beta$rsid),
+        paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt")
+      )
+    }
+    
     # Mark overlapped variants
     m <- lapply(snps_list, FUN=function (x){x %in% df_beta$rsid})
     tmpLD <- LD_list
@@ -242,13 +249,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
-  
-  # Save block 1 SNPs after Step 2.1
-  block1_snps_chr <- snps_list0[[1]][[1]]  # first ethnic group (l=1), first block (block=1)
-  writeLines(
-    block1_snps_chr,
-    paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt")
-  )
   
   nblock <- length(LD_list0[[l]])
   #nblock <- 1
@@ -308,13 +308,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   indx <- indx1
   indx_block <- indx_block1
   snp_list <- snp_list1
-  
-  block1_snps_chr <- snp_list1[[1]]
-  writeLines(
-    block1_snps_chr,
-    paste0(opt$PATH_out, "/tmp/block1_snps_chr", chr, ".txt")
-  )
-  
   Nsnps <- Nsnps1
   N <- N0
   #testing

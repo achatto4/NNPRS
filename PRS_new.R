@@ -371,7 +371,8 @@ alpha <- 0.001  # Use same alpha for all
   #     b_tmp <- c(b_tmp, tmp1 * tmp2)  # Concatenate to build PRS vector
   #   }
   # }
-
+  # Final PRS matrix
+  #prs <- b_tmp
 # — only use block 1 for the final PRS —
 tmp1  <- res[[1]]$b              # betas from block 1
 tmp2  <- snps_scale[[1]][,1]     # scale factors from block 1
@@ -379,8 +380,6 @@ tmp2[is.na(tmp2)] <- 0           # safety
 prs   <- tmp1 * tmp2             # final PRS is just block 1
 
   
-  # Final PRS matrix
-  prs <- b_tmp
   #testing
   
   # Clean the PRS matrix

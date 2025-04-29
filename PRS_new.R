@@ -458,10 +458,21 @@ score_list <- foreach(j = 1:length(allchrom)) %dopar% {
 
 score <- do.call(rbind, score_list)  # Explicitly concatenate
 
-registerDoMC(1)
-tmp <- score[,4] != 0; m <- !(tmp==0)
-score <- score[m,,drop=F]
-colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
+# registerDoMC(1)
+# tmp <- score[,4] != 0; m <- !(tmp==0)
+# score <- score[m,,drop=F]
+# colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
+
+# 1) Name the columns immediately
+colnames(score) <- c(
+  "rsid", "a1", "a0",
+  paste0("score", seq_len(ncol(score) - 3))
+)
+
+# 2) If you have a score1 column, drop all-zero rows
+if ("score1" %in% colnames(score)) {
+  score <- score[ score$score1 != 0, , drop = FALSE ]
+}
 
 # Select the top 10% highest absolute scores
 # threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile

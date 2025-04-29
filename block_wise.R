@@ -211,6 +211,13 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     load(paste0(opt$PATH_package,"/",ethnic[l],"/chr",chr,"_LD.RData"))
     df_beta <- df_beta_list[[l]]
     
+    if (l == 1) {  # only for first ethnic group
+      writeLines(
+        as.character(df_beta$rsid),
+        paste0(opt$PATH_out, "/block1_snps.txt")
+      )
+    }
+    
     # Mark overlapped variants
     m <- lapply(snps_list, FUN=function (x){x %in% df_beta$rsid})
     tmpLD <- LD_list
@@ -257,9 +264,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   summ_list1 <- vector("list", length = nblock)
   snps_scale1 <- vector("list", length = nblock)
   LD_list1 <- vector("list", length = nblock)
-
+  
   for (bl in 1:nblock){
-
+    
     ## snp_list1, Nsnps1
     snp_list_tmp <- vector("list", length = M)
     tmp <- character()
@@ -273,7 +280,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     if(Nsnps1[bl]==0){ indx_block1[bl] <- 0; next }
     snp_list1[[bl]] <- tmp
     indx_block1[bl] <- 1
-
+    
     ## indx1: the position of ref SNP in original summ_list
     ## summ_list1: summ stat matched to reference snp list (set to 0 for snps not in a certain ethnic group)
     ## LD_list1: LD correlations matched to reference snp list (set to 0 for snps not in a certain ethnic group)
@@ -291,10 +298,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     summ_list1[[bl]] <- summ_list_tmp
     snps_scale1[[bl]] <- snps_scale_tmp
     LD_list1[[bl]] <- LD_list_tmp
-
+    
     rm(list=c("indx_tmp","summ_list_tmp","snps_scale_tmp","LD_list_tmp","snp_list_tmp","tmp","m1"))
   }
-
+  
   summ_list <- summ_list1
   snps_scale <- snps_scale1
   LD_list <- LD_list1
@@ -319,34 +326,34 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # eta = best_r2_matrix[chr, 3]
   # iter = best_r2_matrix[chr, 2]
   
-iter <- 1000
-eta <- 10^-3  # Use same eta for all
-alpha <- 0.001  # Use same alpha for all
+  iter <- 1000
+  eta <- 10^-3  # Use same eta for all
+  alpha <- 0.001  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
-    summ_list,
-    LD_list,
-    M,
-    indx,
-    indx_block,
-    n0 = N0[1],
-    nk_list = N0[-1],
-    alpha1 = alpha,
-    alpha2 = alpha,
-    alpha3 = alpha,
-    alpha4 = alpha,
-    eta_l = eta, 
-    eta_m = eta,
-    max_iter = iter,
-    adaptive = FALSE,
-    alpha_adaptive = FALSE,
-    eta = 0.001,
-    beta1 = 0.9,
-    beta2 = 0.999,
-    epsilon = 1e-8
-  )  
-    }, error = function(e) {
+      summ_list,
+      LD_list,
+      M,
+      indx,
+      indx_block,
+      n0 = N0[1],
+      nk_list = N0[-1],
+      alpha1 = alpha,
+      alpha2 = alpha,
+      alpha3 = alpha,
+      alpha4 = alpha,
+      eta_l = eta, 
+      eta_m = eta,
+      max_iter = iter,
+      adaptive = FALSE,
+      alpha_adaptive = FALSE,
+      eta = 0.001,
+      beta1 = 0.9,
+      beta2 = 0.999,
+      epsilon = 1e-8
+    )  
+  }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")
     cat("Error message:", e$message, "\n")
   })
@@ -356,7 +363,7 @@ alpha <- 0.001  # Use same alpha for all
   ############
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
-
+  
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
   for (bl in 1:nblock) {
     tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
@@ -482,6 +489,7 @@ if(opt$testing){
   if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
+                "--extract", paste0(opt$PATH_out, "/block1_snps.txt"),
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")

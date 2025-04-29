@@ -239,7 +239,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     snps_scale0[[l]] <- lapply(tmp, FUN=function (x){ x$snps_scale } )
     
     # Get only the rsid values from the first block (tmp[[1]])
-    rsids_block1 <- tmp[[1]][[1]]$rsid
+    rsids_block1 <- df_beta[match(snps_list0[[l]][[1]], df_beta$rsid),]$rsid
     
     # Write the rsids to a text file, one per line
     writeLines(

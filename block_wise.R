@@ -238,7 +238,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     summ_list0[[l]] <- lapply(tmp, FUN=function (x){ x$beta_hat } )
     snps_scale0[[l]] <- lapply(tmp, FUN=function (x){ x$snps_scale } )
     
-    print(snps_list0[[l]])
     # Get only the rsid values from the first block (tmp[[1]])
     if(l == 1){
       rsids_block1 <- df_beta[match(snps_list0[[l]][[2]], df_beta$rsid),]$rsid

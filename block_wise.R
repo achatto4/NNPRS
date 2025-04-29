@@ -238,6 +238,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     summ_list0[[l]] <- lapply(tmp, FUN=function (x){ x$beta_hat } )
     snps_scale0[[l]] <- lapply(tmp, FUN=function (x){ x$snps_scale } )
     
+    print(snps_list0[[l]])
     # Get only the rsid values from the first block (tmp[[1]])
     rsids_block1 <- df_beta[match(snps_list0[[l]][[1]], df_beta$rsid),]$rsid
     
@@ -370,7 +371,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   for (bl in 1:nblock) {
     tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
     tmp2 <- snps_scale[[bl]][,1]  # SNP scaling for block 'bl'
-    dim(res[[bl]]$b);dim(snps_scale[[bl]])
     tmp2[is.na(tmp2)] <- 0    # Replace NA values in SNP scale with 0
     
     # Multiply beta vector (tmp1) by SNP scaling (tmp2)

@@ -340,7 +340,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   
   iter <- 1
   eta <- 1  # Use same eta for all
-  alpha <- 0.001  # Use same alpha for all
+  alpha <- 1  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(

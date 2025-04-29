@@ -247,6 +247,14 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
         as.character(rsids_block1),
         file.path(opt$PATH_out, "block1_snps.txt")
       )
+      
+      rsids_block_beta <- df_beta[match(snps_list0[[l]][[2]], df_beta$rsid),]$beta_hat
+      
+      # Write the rsids to a text file, one per line
+      writeLines(
+        as.character(rsids_block_beta),
+        file.path(opt$PATH_out, "block1_beta_old.txt")
+      )
     }
     
     if ( opt$verbose == 2 ) cat(paste0(sum(Nsnps0[[l]])," SNPs are included in the analysis of ",ethnic[l]," on CHR",chr,messageflip))

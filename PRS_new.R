@@ -214,7 +214,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     if (l == 1) {  # only for first ethnic group
       writeLines(
         as.character(df_beta$rsid),
-        paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt")
+        paste0(opt$PATH_out, "/block1_snps.txt")
       )
     }
     
@@ -489,7 +489,7 @@ if(opt$testing){
   if (opt$verbose == 2) cat("\n** PLINK step started **\n")
   arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
                 " --bfile ",opt$bfile_testing,
-                "--extract", paste0(opt$PATH_out, "/block1_snps_chr", chr, ".txt"),
+                "--extract", paste0(opt$PATH_out, "/block1_snps.txt"),
                 " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
                 " cols=+scoresums,-scoreavgs --score-col-nums 4",
                 " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")

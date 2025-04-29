@@ -211,13 +211,6 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     load(paste0(opt$PATH_package,"/",ethnic[l],"/chr",chr,"_LD.RData"))
     df_beta <- df_beta_list[[l]]
     
-    if (l == 1) {  # only for first ethnic group
-      writeLines(
-        as.character(df_beta$rsid),
-        paste0(opt$PATH_out, "/block1_snps.txt")
-      )
-    }
-    
     # Mark overlapped variants
     m <- lapply(snps_list, FUN=function (x){x %in% df_beta$rsid})
     tmpLD <- LD_list
@@ -244,6 +237,11 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     tmp <- lapply(snps_list0[[l]], FUN=function (x){ df_beta[match(x, df_beta$rsid),] } )
     summ_list0[[l]] <- lapply(tmp, FUN=function (x){ x$beta_hat } )
     snps_scale0[[l]] <- lapply(tmp, FUN=function (x){ x$snps_scale } )
+    
+    writeLines(
+      as.character(tmp[[1]]),
+      paste0(opt$PATH_out, "/block1_snps.txt")
+    )
     
     if ( opt$verbose == 2 ) cat(paste0(sum(Nsnps0[[l]])," SNPs are included in the analysis of ",ethnic[l]," on CHR",chr,messageflip))
     

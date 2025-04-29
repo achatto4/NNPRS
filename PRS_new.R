@@ -243,8 +243,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
   
-  #nblock <- length(LD_list0[[l]])
-  nblock <- 1
+  nblock <- length(LD_list0[[l]])
+  #nblock <- 1
   if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.2. Transform to standard data format
@@ -325,11 +325,11 @@ alpha <- 0.001  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
-    summ_list,
-    LD_list,
+    summ_list[[1]],
+    LD_list[[1]],
     M,
-    indx,
-    indx_block,
+    indx[[1]],
+    indx_block[1],
     n0 = N0[1],
     nk_list = N0[-1],
     alpha1 = alpha,

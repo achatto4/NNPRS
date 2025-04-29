@@ -240,7 +240,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     
     # Get only the rsid values from the first block (tmp[[1]])
     if(l == 1){
-      rsids_block1 <- df_beta[match(snps_list0[[l]][[2]], df_beta$rsid),]$rsid
+      rsids_block1 <- df_beta[match(snps_list0[[l]][[3]], df_beta$rsid),]$rsid
       
       # Write the rsids to a text file, one per line
       writeLines(
@@ -248,7 +248,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
         file.path(opt$PATH_out, "block1_snps.txt")
       )
       
-      rsids_block_beta <- df_beta[match(snps_list0[[l]][[2]], df_beta$rsid),]$beta_hat
+      rsids_block_beta <- df_beta[match(snps_list0[[l]][[3]], df_beta$rsid),]$beta_hat
       
       # Write the rsids to a text file, one per line
       writeLines(

@@ -243,7 +243,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     rm(list = c("i","LD_list","Nsnps","snps_list","tmp","tmpLD","tmpSNP","m","df_beta"))
   }
   
-  nblock <- length(LD_list0[[l]])
+  #nblock <- length(LD_list0[[l]])
+  nblock <- 1
   if (opt$verbose == 2) cat("\n** Step 2.1 ended for chromosome ", chr, " **\n")
   ############
   ## Step 2.2. Transform to standard data format
@@ -318,8 +319,8 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   # eta = best_r2_matrix[chr, 3]
   # iter = best_r2_matrix[chr, 2]
   
-iter <- 10000
-eta <- 10^-4  # Use same eta for all
+iter <- 1000
+eta <- 10^-3  # Use same eta for all
 alpha <- 0.001  # Use same alpha for all
   
   tryCatch({

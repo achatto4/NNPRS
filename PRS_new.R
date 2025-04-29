@@ -325,11 +325,11 @@ alpha <- 0.001  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
-    summ_list[[1]],
-    LD_list[[1]],
+    summ_list,
+    LD_list,
     M,
-    indx[[1]],
-    indx_block[1],
+    indx,
+    indx_block,
     n0 = N0[1],
     nk_list = N0[-1],
     alpha1 = alpha,

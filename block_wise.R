@@ -104,7 +104,7 @@ if ( opt$verbose >= 1 ) cat("\n** Step 1. Preprocessing data **\n")
 # exp_seq <- unique(round(exp(seq(log(1), log(1000), length.out = 10))))
 # iters <- unique(c(1:10, exp_seq))
 #iters <- unique(round(exp(seq(log(1), log(10000), length.out = 10))))
-iters <- c(1, 10, 100)
+iters <- c(1000)
 etas <- c(0.1, 0.01, 0.001)  # Use same eta for all
 alphas <- c(0.1, 0.01, 0.001, 0.0001)  # Use same alpha for all
 

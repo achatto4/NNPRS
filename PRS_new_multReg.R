@@ -11,6 +11,7 @@ suppressMessages(library("glmnet"))
 suppressMessages(library("MASS"))
 suppressMessages(library("doMC"))
 suppressMessages(library("foreach"))
+suppressMessages(library(data.table))
 
 # ## progress bar function from https://stackoverflow.com/questions/51213293/is-it-possible-to-get-a-progress-bar-with-foreach-and-a-multicore-kind-of-back
 progBar <- function(ii, N, per = 10) {

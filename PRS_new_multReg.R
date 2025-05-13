@@ -374,7 +374,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   }
   
   # Final PRS matrix (standardizing to not allow PRS to become extremely large/small)
-  prs <- b_tmp/sd(b_tmp)
+  prs <- b_tmp
   #testing
   
   # Clean the PRS matrix

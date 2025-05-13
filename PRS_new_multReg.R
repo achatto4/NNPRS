@@ -257,9 +257,9 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   summ_list1 <- vector("list", length = nblock)
   snps_scale1 <- vector("list", length = nblock)
   LD_list1 <- vector("list", length = nblock)
-
+  
   for (bl in 1:nblock){
-
+    
     ## snp_list1, Nsnps1
     snp_list_tmp <- vector("list", length = M)
     tmp <- character()
@@ -273,7 +273,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     if(Nsnps1[bl]==0){ indx_block1[bl] <- 0; next }
     snp_list1[[bl]] <- tmp
     indx_block1[bl] <- 1
-
+    
     ## indx1: the position of ref SNP in original summ_list
     ## summ_list1: summ stat matched to reference snp list (set to 0 for snps not in a certain ethnic group)
     ## LD_list1: LD correlations matched to reference snp list (set to 0 for snps not in a certain ethnic group)
@@ -291,10 +291,10 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
     summ_list1[[bl]] <- summ_list_tmp
     snps_scale1[[bl]] <- snps_scale_tmp
     LD_list1[[bl]] <- LD_list_tmp
-
+    
     rm(list=c("indx_tmp","summ_list_tmp","snps_scale_tmp","LD_list_tmp","snp_list_tmp","tmp","m1"))
   }
-
+  
   summ_list <- summ_list1
   snps_scale <- snps_scale1
   LD_list <- LD_list1
@@ -319,34 +319,34 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   eta = best_r2_matrix[chr, 3]
   iter = best_r2_matrix[chr, 2]
   
-# iter <- 1000
-# eta <- 10^-3  # Use same eta for all
-# alpha <- 0.001  # Use same alpha for all
+  # iter <- 1000
+  # eta <- 10^-3  # Use same eta for all
+  # alpha <- 0.001  # Use same alpha for all
   
   tryCatch({
     res <- gradient_descent_transfer_learning_all_blocks(
-    summ_list,
-    LD_list,
-    M,
-    indx,
-    indx_block,
-    n0 = N0[1],
-    nk_list = N0[-1],
-    alpha1 = alpha,
-    alpha2 = alpha,
-    alpha3 = alpha,
-    alpha4 = alpha,
-    eta_l = eta, 
-    eta_m = eta,
-    max_iter = iter,
-    adaptive = FALSE,
-    alpha_adaptive = FALSE,
-    eta = 0.001,
-    beta1 = 0.9,
-    beta2 = 0.999,
-    epsilon = 1e-8
-  )  
-    }, error = function(e) {
+      summ_list,
+      LD_list,
+      M,
+      indx,
+      indx_block,
+      n0 = N0[1],
+      nk_list = N0[-1],
+      alpha1 = alpha,
+      alpha2 = alpha,
+      alpha3 = alpha,
+      alpha4 = alpha,
+      eta_l = eta, 
+      eta_m = eta,
+      max_iter = iter,
+      adaptive = FALSE,
+      alpha_adaptive = FALSE,
+      eta = 0.001,
+      beta1 = 0.9,
+      beta2 = 0.999,
+      epsilon = 1e-8
+    )  
+  }, error = function(e) {
     cat("Error encountered during gradient descent for chromosome", chr, "\n")
     cat("Error message:", e$message, "\n")
   })
@@ -356,7 +356,7 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
   ############
   ## Step 2.4. Clean PRSs into a vector
   if (opt$verbose == 2) cat("\n** Step 2.4 started for chromosome ", chr, " **\n")
-
+  
   # Step 2.4. Clean PRSs into a matrix (#variant X #block)
   for (bl in 1:nblock) {
     tmp1 <- res[[bl]]$b  # Extract beta vector for block 'bl'
@@ -407,35 +407,37 @@ ff <- foreach(j = 1:length(allchrom), ii = icount(), .final = function(x) NULL) 
 rm(list=c("df_beta_list"))
 if (opt$verbose == 2) cat("\n** Step 2.6 ended **\n")
 ############
-## Step 2.7. Combine all chromosomes
-if (opt$verbose == 2) cat("\n** Step 2.7 started **\n")
-# score <- foreach(j = 1:length(allchrom), .combine='rbind') %dopar% {
-#   chr <- allchrom[j]
-#   prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
-#   return(prs)
-# }
+## --- new Step 2.7: build one big weight file with 1 column per chr ---
+if (opt$verbose==2) message("** Step 2.7: building multi-chr weight file **")
 
-score_list <- foreach(j = 1:length(allchrom)) %dopar% {
-  chr <- allchrom[j]
-  prs <- fread2(paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"))
-  return(prs)
-}
+# read in each chr’s SNP weights
+all_w <- lapply(allchrom, function(chr){
+  df <- fread2(
+    paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"),
+    col.names = c("rsid","a1","a0", paste0("w_chr",chr))
+  )
+  # rename so we can merge
+  setnames(df, paste0("w_chr",chr))
+  return(df)
+})
 
-score <- do.call(rbind, score_list)  # Explicitly concatenate
+# merge them all by rsid/a1/a0
+weight_table <- Reduce(function(x,y) 
+  merge(x,y, by=c("rsid","a1","a0"), all=TRUE), 
+  all_w
+)
 
-registerDoMC(1)
-tmp <- score[,4] != 0; m <- !(tmp==0)
-score <- score[m,,drop=F]
-colnames(score) <- c("rsid","a1","a0",paste0("score",1:(ncol(score)-3)))
+# replace missing weights by 0
+for (j in 4:ncol(weight_table)) weight_table[[j]][ is.na(weight_table[[j]]) ] <- 0L
 
-# Select the top 10% highest absolute scores
-# threshold <- quantile(abs(score[,4]), q_thresh)  # Compute the percentile
-# score <- score[abs(score[,4]) >= threshold, , drop = FALSE]
+# write out: header, so PLINK can pick multiple columns
+fwrite2(weight_table,
+        paste0(opt$PATH_out,"/before_ensemble/score_file_multi_chr.txt"),
+        col.names=TRUE, sep="\t", nThread=NCORES
+)
 
-fwrite2(score, paste0(opt$PATH_out,"/before_ensemble/score_file.txt"), col.names = T, sep="\t", nThread=NCORES)
-
-if ( opt$verbose >= 1 ) cat(paste0("PRS saved in ", opt$PATH_out,"/before_ensemble/score_file.txt \n"))
-if (opt$verbose == 2) cat("\n** Step 2.7 ended **\n")
+if (opt$verbose>=1) message("Wrote multi-chr weight file to ", 
+                            opt$PATH_out,"/before_ensemble/score_file_multi_chr.txt")
 
 
 if(opt$testing){
@@ -476,40 +478,50 @@ if(opt$testing){
     pheno[,3] <- scale(reg$resid)
   }
   if (opt$verbose == 2) cat("\n** Step 3.1 ended **\n")
-  ############
-  ## Step 3.2. Calculate scores for all tuning parameter settings on tuning samples
-  if (opt$verbose == 2) cat("\n** Step 3.2 started  **\n")
-  if (opt$verbose == 2) cat("\n** PLINK step started **\n")
-  arg <- paste0(opt$PATH_plink ," --threads ",NCORES,
-                " --bfile ",opt$bfile_testing,
-                " --score ", opt$PATH_out,"/before_ensemble/score_file.txt header-read",
-                " cols=+scoresums,-scoreavgs --score-col-nums 4",
-                " --out ",opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing")
-  # system( arg , ignore.stdout=SYS_PRINT,ignore.stderr=SYS_PRINT)
-  system(arg, ignore.stdout = TRUE, ignore.stderr = TRUE)
-  if (opt$verbose == 2) cat("\n** PLINK step ended **\n")
-  if (!file.exists(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing.sscore"))) {
-    stop("Error: PLINK output file does not exist. Check if PLINK ran successfully.")
-  }
-  SCORE <- fread2(paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/before_ensemble_testing.sscore"))
+  ############# suppose you’re still in the --- if (opt$testing) --- block
   
-  m <- match( paste(fam[,1],fam[,2]) , paste(SCORE[,1],SCORE[,2]) )
-  m.keep <- !is.na(m)
-  fam <- fam[m.keep,]
-  pheno <- pheno[m.keep,]
-  SCORE <- SCORE[m[m.keep],]
-  SCORE_id <- SCORE[,1:4]
-  SCORE <- SCORE[,-1:-4]
-  if (opt$verbose == 2) cat("\n** score vec derived **\n")
+  score_file <- paste0(opt$PATH_out,"/before_ensemble/score_file_multi_chr.txt")
+  out_prefix <- paste0(opt$PATH_out,"/tmp/sample_scores_",ethnic[1],"/multi_chr_scores")
   
-  # Get testing R2
-  fit <- lm(pheno[,3]~SCORE)
-  R2 <- summary(fit)$r.square
+  # build a comma-separated list of the column-indices 4 through (4+22-1) = 25
+  cols <- paste(4:(3+length(allchrom)), collapse=",")
+  
+  arg <- paste0(
+    opt$PATH_plink, " --threads ", NCORES,
+    " --bfile ", opt$bfile_testing,
+    " --score ", score_file, " header-read",
+    " cols=+scoresums,-scoreavgs",
+    " --score-col-nums ", cols,
+    " --out ", out_prefix
+  )
+  system(arg, ignore.stdout=TRUE, ignore.stderr=TRUE)
+  
+  # load the .sscore
+  S <- fread2(paste0(out_prefix,".sscore"))
+  
+  # the first four columns are FID IID CHR:POS etc, the next 22 are your per-chr sums
+  # extract them:
+  part <- S[,  (ncol(S)-length(allchrom)+1) : ncol(S), with=FALSE ]
+  setnames(part, paste0("PRS_chr", allchrom))
+  
+  # part is an N×22 data.table of each individual’s chr-specific score
+  m <- match( paste(fam[,1],fam[,2]),
+              paste(S[,1],S[,2]) )
+  keep <- !is.na(m)
+  fam   <- fam[keep,]
+  pheno <- pheno[keep,]
+  score_mat <- as.data.frame(part[m[keep],])
+  
+  # now the multiple‐regression
+  fit <- lm(pheno[,3] ~ ., data=score_mat)
+  R2  <- summary(fit)$r.squared
+  print(paste0("Multivariate R² = ", round(R2,4)))
+  
   # print(R2)
   
   # Store results
   #results <- rbind(results, data.frame(iter = iter, R2 = R2))
-  print(paste("R²:", R2, "-> Appending results to the dataframe!"))
+  #print(paste("R²:", R2, "-> Appending results to the dataframe!"))
   #print(paste("Iteration:", iter, "|Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))
   # results <- rbind(results, data.frame(iter = iter, eta = eta, alpha = alpha, R2 = R2))
   # print(paste("Iteration:", iter, "| Eta:", eta, "| Alpha:", alpha, "| R²:", R2, "-> Appending results to the dataframe!"))

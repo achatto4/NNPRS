@@ -411,16 +411,13 @@ if (opt$verbose == 2) cat("\n** Step 2.6 ended **\n")
 ## --- new Step 2.7: build one big weight file with 1 column per chr ---
 if (opt$verbose==2) message("** Step 2.7: building multi-chr weight file **")
 
-# read in each chr’s SNP weights
 all_w <- lapply(allchrom, function(chr){
-  df <- fread2(
-    paste0(opt$PATH_out,"/tmp/PRS_in_all_settings_bychrom/prs_chr",chr,".txt"),
+  fread2(
+    paste0(opt$PATH_out, "/tmp/PRS_in_all_settings_bychrom/prs_chr", chr, ".txt"),
     col.names = c("rsid","a1","a0", paste0("w_chr",chr))
   )
-  # rename so we can merge
-  setnames(df, paste0("w_chr",chr))
-  return(df)
 })
+
 
 # merge them all by rsid/a1/a0
 weight_table <- Reduce(function(x,y) 

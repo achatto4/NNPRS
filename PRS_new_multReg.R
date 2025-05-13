@@ -499,9 +499,16 @@ if(opt$testing){
   
   # the first four columns are FID IID CHR:POS etc, the next 22 are your per-chr sums
   # extract them:
-  part <- S[,  (ncol(S)-length(allchrom)+1) : ncol(S), with=FALSE ]
-  setnames(part, paste0("PRS_chr", allchrom))
   
+  library(data.table)
+  setDT(S)   # in-place conversion
+  part <- S[,
+            (ncol(S) - length(allchrom) + 1):ncol(S),
+            with = FALSE
+  ]
+  # data.table’s setnames works here:
+  setnames(part, names(part), paste0("PRS_chr", allchrom))
+
   # part is an N×22 data.table of each individual’s chr-specific score
   m <- match( paste(fam[,1],fam[,2]),
               paste(S[,1],S[,2]) )

@@ -508,17 +508,17 @@ if(opt$testing){
   ]
   # data.table’s setnames works here:
   setnames(part, names(part), paste0("PRS_chr", allchrom))
-
+S1 = as.matrix(S)
   # part is an N×22 data.table of each individual’s chr-specific score
   m <- match( paste(fam[,1],fam[,2]),
-              paste(S[,1],S[,2]) )
+              paste(S1[,1],S1[,2]) )
   keep <- !is.na(m)
   fam   <- fam[keep,]
   pheno <- pheno[keep,]
   score_mat <- as.data.frame(part[m[keep],])
   
   # now the multiple‐regression
-  fit <- lm(pheno[,3] ~ ., data=score_mat)
+  fit <- lm(pheno[,3] ~ PRS_chr1, data=score_mat)
   R2  <- summary(fit)$r.squared
   print(paste0("Multivariate R² = ", round(R2,4)))
   
